@@ -1,4 +1,4 @@
-package com.sophodromos.plugin;
+package io.github.clojang.sophodromos;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.logging.Log;

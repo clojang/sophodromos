@@ -1,4 +1,4 @@
-package com.sophodromos.plugin;
+package io.github.clojang.sophodromos;
 
 import java.util.ArrayList;
 import java.util.List;

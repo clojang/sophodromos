@@ -1,4 +1,4 @@
-package com.sophodromos.plugin;
+package io.github.clojang.sophodromos;
 
 import io.github.clojang.gradldromus.AnsiColors;
 import io.github.clojang.gradldromus.CleanTerminalPrinter;
