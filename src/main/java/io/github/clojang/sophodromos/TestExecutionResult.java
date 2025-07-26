@@ -4,26 +4,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Holds the results of test execution. */
+@SuppressWarnings({"PMD.DataClass", "PMD.TestClassWithoutTestCases"}) 
+// This is not a test class, it's a data holder
 public class TestExecutionResult {
+
+  private static final int MIN_PARTS_LENGTH = 1;
 
   private final List<String> outputLines = new ArrayList<>();
   private final List<String> errorLines = new ArrayList<>();
   private final List<String> failures = new ArrayList<>();
 
-  private int totalTests = 0;
-  private int passedTests = 0;
-  private int failedTests = 0;
-  private int errorTests = 0;
-  private int skippedTests = 0;
-  private long executionTime = 0;
-  private int exitCode = 0;
+  private int totalTests;
+  private int passedTests;
+  private int failedTests;
+  private int errorTests;
+  private int skippedTests;
+  private long executionTime;
+  private int exitCode;
+
+  /**
+   * Default constructor - all fields initialized to default values.
+   * Explicit constructor added to satisfy PMD AtLeastOneConstructor rule.
+   */
+  public TestExecutionResult() {
+    // Using default initialization for all fields
+  }
 
   /**
    * Adds an output line and analyzes it for test statistics.
    *
    * @param line the output line to add
    */
-  public void addOutputLine(String line) {
+  public void addOutputLine(final String line) {
     if (line != null) {
       outputLines.add(line);
       analyzeOutputLine(line);
@@ -35,49 +47,65 @@ public class TestExecutionResult {
    *
    * @param line the error line to add
    */
-  public void addErrorLine(String line) {
+  public void addErrorLine(final String line) {
     if (line != null) {
       errorLines.add(line);
       analyzeErrorLine(line);
     }
   }
 
-  private void analyzeOutputLine(String line) {
-    // TODO: Analyze output lines here to extract test statistics
-
-    // Simple pattern matching for common test frameworks
+  private void analyzeOutputLine(final String line) {
     if (line.contains("Tests run:")) {
-      // Extract test counts from surefire output
-      // Format: "Tests run: 5, Failures: 1, Errors: 0, Skipped: 0"
-      try {
-        String[] parts = line.split(",");
-        for (String part : parts) {
-          part = part.trim();
-          if (part.startsWith("Tests run:")) {
-            totalTests += Integer.parseInt(part.split(":")[1].trim());
-          } else if (part.startsWith("Failures:")) {
-            failedTests += Integer.parseInt(part.split(":")[1].trim());
-          } else if (part.startsWith("Errors:")) {
-            errorTests += Integer.parseInt(part.split(":")[1].trim());
-          } else if (part.startsWith("Skipped:")) {
-            skippedTests += Integer.parseInt(part.split(":")[1].trim());
-          }
-        }
-        passedTests = totalTests - failedTests - errorTests - skippedTests;
-      } catch (NumberFormatException e) {
-        // Ignore parsing errors
-      }
+      parseTestResults(line);
     }
 
-    // Detect individual test failures
-    if (line.contains("FAILURE:") || line.contains("ERROR:")) {
+    if (isTestFailure(line)) {
       failures.add(line);
     }
   }
 
-  private void analyzeErrorLine(String line) {
-    // TODO: Analyze error lines here to extract failure information
+  private void parseTestResults(final String line) {
+    try {
+      final String[] parts = line.split(",");
+      for (final String part : parts) {
+        final String trimmedPart = part.trim();
+        updateTestCounts(trimmedPart);
+      }
+      passedTests = totalTests - failedTests - errorTests - skippedTests;
+    } catch (final NumberFormatException e) {
+      // Ignore parsing errors - malformed test output should not break the build
+      // This is intentionally minimal logging to avoid cluttering output
+      // Full logging could be added at debug level if needed for troubleshooting
+    }
+  }
 
+  private void updateTestCounts(final String part) {
+    if (part.startsWith("Tests run:")) {
+      totalTests += extractNumber(part);
+    } else if (part.startsWith("Failures:")) {
+      failedTests += extractNumber(part);
+    } else if (part.startsWith("Errors:")) {
+      errorTests += extractNumber(part);
+    } else if (part.startsWith("Skipped:")) {
+      skippedTests += extractNumber(part);
+    }
+  }
+
+  private int extractNumber(final String part) {
+    int result = 0;
+    final String[] splitPart = part.split(":");
+    if (splitPart.length > MIN_PARTS_LENGTH) {
+      final String numberStr = splitPart[1].trim();
+      result = Integer.parseInt(numberStr);
+    }
+    return result;
+  }
+
+  private boolean isTestFailure(final String line) {
+    return line.contains("FAILURE:") || line.contains("ERROR:");
+  }
+
+  private void analyzeErrorLine(final String line) {
     if (line.contains("FAILURE") || line.contains("ERROR")) {
       failures.add(line);
     }
@@ -137,31 +165,31 @@ public class TestExecutionResult {
   }
 
   // Setters
-  public void setTotalTests(int totalTests) {
+  public void setTotalTests(final int totalTests) {
     this.totalTests = totalTests;
   }
 
-  public void setPassedTests(int passedTests) {
+  public void setPassedTests(final int passedTests) {
     this.passedTests = passedTests;
   }
 
-  public void setFailedTests(int failedTests) {
+  public void setFailedTests(final int failedTests) {
     this.failedTests = failedTests;
   }
 
-  public void setErrorTests(int errorTests) {
+  public void setErrorTests(final int errorTests) {
     this.errorTests = errorTests;
   }
 
-  public void setSkippedTests(int skippedTests) {
+  public void setSkippedTests(final int skippedTests) {
     this.skippedTests = skippedTests;
   }
 
-  public void setExecutionTime(long executionTime) {
+  public void setExecutionTime(final long executionTime) {
     this.executionTime = executionTime;
   }
 
-  public void setExitCode(int exitCode) {
+  public void setExitCode(final int exitCode) {
     this.exitCode = exitCode;
   }
 }

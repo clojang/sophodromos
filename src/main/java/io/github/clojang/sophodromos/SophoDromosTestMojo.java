@@ -11,6 +11,7 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -45,155 +46,284 @@ public class SophoDromosTestMojo extends AbstractMojo {
 
   private TestOutputFormatter formatter;
   private TestExecutionInterceptor interceptor;
+  private TestProcessManager processManager;
+  private TestOutputCapture outputCapture;
+
+  /**
+   * Default constructor - dependencies are injected via Maven annotations.
+   * Explicit constructor added to satisfy PMD AtLeastOneConstructor rule.
+   */
+  public SophoDromosTestMojo() {
+    // Dependencies injected via Maven annotations
+  }
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (skipTests) {
-      getLog().info("Tests are skipped.");
+      logSkippedTests();
       return;
     }
 
     try {
-      formatter = new TestOutputFormatter(colorOutput, detailedFailures);
-      interceptor = new TestExecutionInterceptor(project, formatter);
-
-      System.out.println(
-          formatter.formatHeader("SophoDromos Test Runner (powered by GradlDromus)"));
-
-      // Execute tests with interception
-      TestExecutionResult result = executeTestsWithInterception();
-
-      // Format and display results
+      initializeComponents();
+      displayHeader();
+      final TestExecutionResult result = executeTestsWithInterception();
       displayFormattedResults(result);
-
-      // Fail build if tests failed
-      if (result.hasFailures()) {
-        throw new MojoFailureException(
-            "Tests failed: "
-                + result.getFailureCount()
-                + " failures, "
-                + result.getErrorCount()
-                + " errors");
-      }
-
-    } catch (MojoExecutionException | MojoFailureException e) {
-      throw e;
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
+      checkForFailures(result);
+    } catch (final InterruptedException e) {
+      handleInterruption();
       throw new MojoExecutionException("Test execution was interrupted", e);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new MojoExecutionException("IO error during test execution", e);
+    }
+  }
+
+  private void handleInterruption() {
+    Thread.currentThread().interrupt();
+  }
+
+  private void logSkippedTests() {
+    final Log log = getLog();
+    if (log.isInfoEnabled()) {
+      log.info("Tests are skipped.");
+    }
+  }
+
+  private void initializeComponents() {
+    formatter = new TestOutputFormatter(colorOutput, detailedFailures);
+    interceptor = new TestExecutionInterceptor(project, formatter);
+    processManager = new TestProcessManager(project);
+    outputCapture = new TestOutputCapture(interceptor, showProgress, getLog());
+  }
+
+  private void displayHeader() {
+    final Log log = getLog();
+    if (log.isInfoEnabled()) {
+      final String headerMessage =
+          formatter.formatHeader("SophoDromos Test Runner (powered by GradlDromus)");
+      log.info(headerMessage);
+    }
+  }
+
+  private void checkForFailures(final TestExecutionResult result) throws MojoFailureException {
+    if (result.hasFailures()) {
+      throw new MojoFailureException(
+          "Tests failed: "
+              + result.getFailureCount()
+              + " failures, "
+              + result.getErrorCount()
+              + " errors");
     }
   }
 
   private TestExecutionResult executeTestsWithInterception()
       throws IOException, InterruptedException {
-    getLog().info("Starting test execution...");
+    logTestExecutionStart();
 
-    // Create process builder for surefire execution
-    ProcessBuilder pb = createSurefireProcessBuilder();
+    final Process process = processManager.createSurefireProcess();
+    final ProcessStreams streams = getProcessStreams(process);
+    final TestExecutionResult result = new TestExecutionResult();
 
-    // Start process and capture output
-    Process process = pb.start();
+    final ThreadManager threadManager = createThreadManager(streams, result);
+    threadManager.startThreads();
 
-    TestExecutionResult result = new TestExecutionResult();
-
-    // Create output capture threads
-    Thread outputThread = createOutputCaptureThread(process.getInputStream(), result);
-    Thread errorThread = createErrorCaptureThread(process.getErrorStream(), result);
-
-    outputThread.start();
-    errorThread.start();
-
-    // Wait for process completion
-    int exitCode = process.waitFor();
-
-    // Wait for output threads to complete
-    outputThread.join(5000);
-    errorThread.join(5000);
+    final int exitCode = process.waitFor();
+    threadManager.waitForCompletion();
 
     result.setExitCode(exitCode);
     return result;
   }
 
-  private ProcessBuilder createSurefireProcessBuilder() {
-    List<String> command = new ArrayList<>();
-
-    command.add("mvn");
-    command.add("surefire:test");
-    command.add("-q"); // Quiet mode to reduce noise
-    command.add("-Dmaven.test.failure.ignore=true"); // Don't fail immediately on test failures
-
-    ProcessBuilder pb = new ProcessBuilder(command);
-    pb.directory(project.getBasedir());
-    pb.redirectErrorStream(false);
-
-    return pb;
+  private ProcessStreams getProcessStreams(final Process process) {
+    return new ProcessStreams(process.getInputStream(), process.getErrorStream());
   }
 
-  private Thread createOutputCaptureThread(InputStream inputStream, TestExecutionResult result) {
-    return new Thread(
-        () -> {
-          try (BufferedReader reader =
-              new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-              String formattedLine = interceptor.interceptTestOutput(line);
-              if (formattedLine != null) {
-                result.addOutputLine(formattedLine);
-
-                if (showProgress) {
-                  System.out.println(formattedLine);
-                }
-              }
-            }
-          } catch (IOException e) {
-            getLog().error("Error reading test output", e);
-          }
-        });
+  private ThreadManager createThreadManager(final ProcessStreams streams, 
+      final TestExecutionResult result) {
+    final Thread outputThread = outputCapture.createOutputCaptureThread(
+        streams.getInputStream(), result);
+    final Thread errorThread = outputCapture.createErrorCaptureThread(
+        streams.getErrorStream(), result);
+    return new ThreadManager(outputThread, errorThread);
   }
 
-  private Thread createErrorCaptureThread(InputStream errorStream, TestExecutionResult result) {
-    return new Thread(
-        () -> {
-          try (BufferedReader reader =
-              new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-              String formattedLine = interceptor.interceptErrorOutput(line);
-              if (formattedLine != null) {
-                result.addErrorLine(formattedLine);
-                System.err.println(formattedLine);
-              }
-            }
-          } catch (IOException e) {
-            getLog().error("Error reading test error output", e);
-          }
-        });
+  private void logTestExecutionStart() {
+    final Log log = getLog();
+    if (log.isInfoEnabled()) {
+      log.info("Starting test execution...");
+    }
   }
 
-  private void displayFormattedResults(TestExecutionResult result) {
-    System.out.println(formatter.formatSummaryHeader());
+  private void displayFormattedResults(final TestExecutionResult result) {
+    final Log log = getLog();
+    if (log.isInfoEnabled()) {
+      final String summaryHeader = formatter.formatSummaryHeader();
+      log.info(summaryHeader);
 
-    String summary =
-        formatter.formatTestSummary(
-            result.getTotalTests(),
-            result.getPassedTests(),
-            result.getFailedTests(),
-            result.getErrorTests(),
-            result.getSkippedTests(),
-            result.getExecutionTime());
+      final String summary =
+          formatter.formatTestSummary(
+              result.getTotalTests(),
+              result.getPassedTests(),
+              result.getFailedTests(),
+              result.getErrorTests(),
+              result.getSkippedTests(),
+              result.getExecutionTime());
 
-    System.out.println(summary);
+      log.info(summary);
 
-    if (result.hasFailures() && detailedFailures) {
-      System.out.println(formatter.formatFailureHeader());
+      if (result.hasFailures() && detailedFailures) {
+        final String failureHeader = formatter.formatFailureHeader();
+        log.info(failureHeader);
 
-      for (String failure : result.getFailures()) {
-        System.out.println(formatter.formatFailureDetail(failure));
+        for (final String failure : result.getFailures()) {
+          final String failureDetail = formatter.formatFailureDetail(failure);
+          log.info(failureDetail);
+        }
       }
+
+      final String footer = formatter.formatFooter();
+      log.info(footer);
+    }
+  }
+
+  // Helper classes to support the refactored code
+  private static class ProcessStreams {
+    private final InputStream inputStream;
+    private final InputStream errorStream;
+
+    ProcessStreams(final InputStream inputStream, final InputStream errorStream) {
+      this.inputStream = inputStream;
+      this.errorStream = errorStream;
     }
 
-    System.out.println(formatter.formatFooter());
+    InputStream getInputStream() {
+      return inputStream;
+    }
+
+    InputStream getErrorStream() {
+      return errorStream;
+    }
+  }
+
+  private static class ThreadManager {
+    private final Thread outputThread;
+    private final Thread errorThread;
+
+    ThreadManager(final Thread outputThread, final Thread errorThread) {
+      this.outputThread = outputThread;
+      this.errorThread = errorThread;
+    }
+
+    void startThreads() {
+      outputThread.start();
+      errorThread.start();
+    }
+
+    void waitForCompletion() throws InterruptedException {
+      outputThread.join(5000);
+      errorThread.join(5000);
+    }
+  }
+}
+
+// Supporting classes that would be created in separate files
+class TestProcessManager {
+  private final MavenProject project;
+
+  TestProcessManager(final MavenProject project) {
+    this.project = project;
+  }
+
+  Process createSurefireProcess() throws IOException {
+    final ProcessBuilder processBuilder = createSurefireProcessBuilder();
+    return processBuilder.start();
+  }
+
+  private ProcessBuilder createSurefireProcessBuilder() {
+    final List<String> command = new ArrayList<>();
+    command.add("mvn");
+    command.add("surefire:test");
+    command.add("-q");
+    command.add("-Dmaven.test.failure.ignore=true");
+
+    final ProcessBuilder processBuilder = new ProcessBuilder(command);
+    processBuilder.directory(project.getBasedir());
+    processBuilder.redirectErrorStream(false);
+    return processBuilder;
+  }
+}
+
+class TestOutputCapture {
+  private final TestExecutionInterceptor interceptor;
+  private final boolean showProgress;
+  private final Log log;
+
+  TestOutputCapture(final TestExecutionInterceptor interceptor, 
+      final boolean showProgress, final Log log) {
+    this.interceptor = interceptor;
+    this.showProgress = showProgress;
+    this.log = log;
+  }
+
+  Thread createOutputCaptureThread(final InputStream inputStream, 
+      final TestExecutionResult result) {
+    return new Thread(() -> processOutputStream(inputStream, result));
+  }
+
+  Thread createErrorCaptureThread(final InputStream errorStream, 
+      final TestExecutionResult result) {
+    return new Thread(() -> processErrorStream(errorStream, result));
+  }
+
+  private void processOutputStream(final InputStream inputStream, 
+      final TestExecutionResult result) {
+    try (BufferedReader reader = 
+         new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+      processReaderLines(reader, result, false);
+    } catch (final IOException e) {
+      log.error("Error reading test output", e);
+    }
+  }
+
+  private void processErrorStream(final InputStream errorStream, final TestExecutionResult result) {
+    try (BufferedReader reader = 
+         new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8))) {
+      processReaderLines(reader, result, true);
+    } catch (final IOException e) {
+      log.error("Error reading test error output", e);
+    }
+  }
+
+  private void processReaderLines(final BufferedReader reader, 
+      final TestExecutionResult result, final boolean isError) 
+      throws IOException {
+    String line = reader.readLine();
+    while (line != null) {
+      final String formattedLine = isError
+          ? interceptor.interceptErrorOutput(line)
+          : interceptor.interceptTestOutput(line);
+      
+      processFormattedLine(formattedLine, result, isError);
+      line = reader.readLine();
+    }
+  }
+
+  private void processFormattedLine(final String formattedLine, 
+      final TestExecutionResult result, final boolean isError) {
+    if (formattedLine != null) {
+      if (isError) {
+        result.addErrorLine(formattedLine);
+        log.error(formattedLine);
+      } else {
+        result.addOutputLine(formattedLine);
+        logProgressIfEnabled(formattedLine);
+      }
+    }
+  }
+
+  private void logProgressIfEnabled(final String formattedLine) {
+    if (showProgress && log.isInfoEnabled()) {
+      log.info(formattedLine);
+    }
   }
 }
