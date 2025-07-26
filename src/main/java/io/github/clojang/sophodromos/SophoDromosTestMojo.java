@@ -1,12 +1,7 @@
 package io.github.clojang.sophodromos;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -50,8 +45,8 @@ public class SophoDromosTestMojo extends AbstractMojo {
   private TestOutputCapture outputCapture;
 
   /**
-   * Default constructor - dependencies are injected via Maven annotations.
-   * Explicit constructor added to satisfy PMD AtLeastOneConstructor rule.
+   * Default constructor - dependencies are injected via Maven annotations. Explicit constructor
+   * added to satisfy PMD AtLeastOneConstructor rule.
    */
   public SophoDromosTestMojo() {
     // Dependencies injected via Maven annotations
@@ -138,12 +133,12 @@ public class SophoDromosTestMojo extends AbstractMojo {
     return new ProcessStreams(process.getInputStream(), process.getErrorStream());
   }
 
-  private ThreadManager createThreadManager(final ProcessStreams streams, 
-      final TestExecutionResult result) {
-    final Thread outputThread = outputCapture.createOutputCaptureThread(
-        streams.getInputStream(), result);
-    final Thread errorThread = outputCapture.createErrorCaptureThread(
-        streams.getErrorStream(), result);
+  private ThreadManager createThreadManager(
+      final ProcessStreams streams, final TestExecutionResult result) {
+    final Thread outputThread =
+        outputCapture.createOutputCaptureThread(streams.getInputStream(), result);
+    final Thread errorThread =
+        outputCapture.createErrorCaptureThread(streams.getErrorStream(), result);
     return new ThreadManager(outputThread, errorThread);
   }
 
@@ -222,108 +217,6 @@ public class SophoDromosTestMojo extends AbstractMojo {
     void waitForCompletion() throws InterruptedException {
       outputThread.join(5000);
       errorThread.join(5000);
-    }
-  }
-}
-
-// Supporting classes that would be created in separate files
-class TestProcessManager {
-  private final MavenProject project;
-
-  TestProcessManager(final MavenProject project) {
-    this.project = project;
-  }
-
-  Process createSurefireProcess() throws IOException {
-    final ProcessBuilder processBuilder = createSurefireProcessBuilder();
-    return processBuilder.start();
-  }
-
-  private ProcessBuilder createSurefireProcessBuilder() {
-    final List<String> command = new ArrayList<>();
-    command.add("mvn");
-    command.add("surefire:test");
-    command.add("-q");
-    command.add("-Dmaven.test.failure.ignore=true");
-
-    final ProcessBuilder processBuilder = new ProcessBuilder(command);
-    processBuilder.directory(project.getBasedir());
-    processBuilder.redirectErrorStream(false);
-    return processBuilder;
-  }
-}
-
-class TestOutputCapture {
-  private final TestExecutionInterceptor interceptor;
-  private final boolean showProgress;
-  private final Log log;
-
-  TestOutputCapture(final TestExecutionInterceptor interceptor, 
-      final boolean showProgress, final Log log) {
-    this.interceptor = interceptor;
-    this.showProgress = showProgress;
-    this.log = log;
-  }
-
-  Thread createOutputCaptureThread(final InputStream inputStream, 
-      final TestExecutionResult result) {
-    return new Thread(() -> processOutputStream(inputStream, result));
-  }
-
-  Thread createErrorCaptureThread(final InputStream errorStream, 
-      final TestExecutionResult result) {
-    return new Thread(() -> processErrorStream(errorStream, result));
-  }
-
-  private void processOutputStream(final InputStream inputStream, 
-      final TestExecutionResult result) {
-    try (BufferedReader reader = 
-         new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-      processReaderLines(reader, result, false);
-    } catch (final IOException e) {
-      log.error("Error reading test output", e);
-    }
-  }
-
-  private void processErrorStream(final InputStream errorStream, final TestExecutionResult result) {
-    try (BufferedReader reader = 
-         new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8))) {
-      processReaderLines(reader, result, true);
-    } catch (final IOException e) {
-      log.error("Error reading test error output", e);
-    }
-  }
-
-  private void processReaderLines(final BufferedReader reader, 
-      final TestExecutionResult result, final boolean isError) 
-      throws IOException {
-    String line = reader.readLine();
-    while (line != null) {
-      final String formattedLine = isError
-          ? interceptor.interceptErrorOutput(line)
-          : interceptor.interceptTestOutput(line);
-      
-      processFormattedLine(formattedLine, result, isError);
-      line = reader.readLine();
-    }
-  }
-
-  private void processFormattedLine(final String formattedLine, 
-      final TestExecutionResult result, final boolean isError) {
-    if (formattedLine != null) {
-      if (isError) {
-        result.addErrorLine(formattedLine);
-        log.error(formattedLine);
-      } else {
-        result.addOutputLine(formattedLine);
-        logProgressIfEnabled(formattedLine);
-      }
-    }
-  }
-
-  private void logProgressIfEnabled(final String formattedLine) {
-    if (showProgress && log.isInfoEnabled()) {
-      log.info(formattedLine);
     }
   }
 }

@@ -3,9 +3,7 @@ package io.github.clojang.sophodromos;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Handles pattern matching for different types of test output.
- */
+/** Handles pattern matching for different types of test output. */
 class OutputPatternMatcher {
   // Patterns for common test output formats
   private static final Pattern RUNNING_PATTERN = Pattern.compile("^Running (.+)$");
@@ -26,8 +24,7 @@ class OutputPatternMatcher {
    * @param formatter the output formatter
    * @return formatted result or null if no match
    */
-  String tryMatchTestClassExecution(final String line, 
-      final TestOutputFormatter formatter) {
+  String tryMatchTestClassExecution(final String line, final TestOutputFormatter formatter) {
     // PMD suppression: Using static pattern matcher is acceptable
     final Matcher runningMatcher = RUNNING_PATTERN.matcher(line);
     String result = null;
@@ -45,8 +42,7 @@ class OutputPatternMatcher {
    * @param formatter the output formatter
    * @return formatted result or null if no match
    */
-  String tryMatchIndividualTest(final String line, 
-      final TestOutputFormatter formatter) {
+  String tryMatchIndividualTest(final String line, final TestOutputFormatter formatter) {
     final Matcher testMatcher = INDIVIDUAL_PATTERN.matcher(line);
     String result = null;
     if (testMatcher.matches()) {
@@ -54,8 +50,8 @@ class OutputPatternMatcher {
       final String className = testMatcher.group(2);
       final double timeElapsed = Double.parseDouble(testMatcher.group(3));
       final String status = testMatcher.group(4);
-      result = formatter.formatTestResult(className, methodName, status, 
-          (long) (timeElapsed * 1000));
+      result =
+          formatter.formatTestResult(className, methodName, status, (long) (timeElapsed * 1000));
     }
     return result;
   }
@@ -67,16 +63,15 @@ class OutputPatternMatcher {
    * @param formatter the output formatter
    * @return formatted result or null if no match
    */
-  String tryMatchTestSuccess(final String line, 
-      final TestOutputFormatter formatter) {
+  String tryMatchTestSuccess(final String line, final TestOutputFormatter formatter) {
     final Matcher successMatcher = SUCCESS_PATTERN.matcher(line);
     String result = null;
     if (successMatcher.matches()) {
       final String methodName = successMatcher.group(1);
       final String className = successMatcher.group(2);
       final double timeElapsed = Double.parseDouble(successMatcher.group(3));
-      result = formatter.formatTestResult(className, methodName, "SUCCESS", 
-          (long) (timeElapsed * 1000));
+      result =
+          formatter.formatTestResult(className, methodName, "SUCCESS", (long) (timeElapsed * 1000));
     }
     return result;
   }
@@ -88,24 +83,24 @@ class OutputPatternMatcher {
    * @param formatter the output formatter
    * @return formatted result or null if no match
    */
-  String tryMatchTestResults(final String line, 
-      final TestOutputFormatter formatter) {
+  String tryMatchTestResults(final String line, final TestOutputFormatter formatter) {
     final Matcher resultMatcher = RESULT_PATTERN.matcher(line);
     String result = null;
     if (resultMatcher.matches()) {
-      result = formatTestResults(
-          Integer.parseInt(resultMatcher.group(1)), // tests run
-          Integer.parseInt(resultMatcher.group(2)), // failures
-          Integer.parseInt(resultMatcher.group(3)), // errors
-          Integer.parseInt(resultMatcher.group(4)), // skipped
-          Double.parseDouble(resultMatcher.group(5)), // time
-          formatter);
+      result =
+          formatTestResults(
+              Integer.parseInt(resultMatcher.group(1)), // tests run
+              Integer.parseInt(resultMatcher.group(2)), // failures
+              Integer.parseInt(resultMatcher.group(3)), // errors
+              Integer.parseInt(resultMatcher.group(4)), // skipped
+              Double.parseDouble(resultMatcher.group(5)), // time
+              formatter);
     }
     return result;
   }
 
-  private String formatTestClassExecution(final String testClass, 
-      final TestOutputFormatter formatter) {
+  private String formatTestClassExecution(
+      final String testClass, final TestOutputFormatter formatter) {
     final String simpleName = testClass.substring(testClass.lastIndexOf('.') + 1);
     return formatter.formatProgressLine("🧪 Executing " + simpleName + "...");
   }

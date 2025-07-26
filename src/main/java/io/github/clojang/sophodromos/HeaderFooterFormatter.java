@@ -5,9 +5,7 @@ import io.github.clojang.gradldromus.CleanTerminalPrinter;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-/**
- * Handles header and footer formatting for test output.
- */
+/** Handles header and footer formatting for test output. */
 class HeaderFooterFormatter {
   private final CleanTerminalPrinter printer;
   private final AnsiColors colors;
@@ -18,8 +16,7 @@ class HeaderFooterFormatter {
    * @param printer the terminal printer
    * @param colors the color formatter
    */
-  HeaderFooterFormatter(final CleanTerminalPrinter printer, 
-      final AnsiColors colors) {
+  HeaderFooterFormatter(final CleanTerminalPrinter printer, final AnsiColors colors) {
     this.printer = printer;
     this.colors = colors;
   }
@@ -36,8 +33,7 @@ class HeaderFooterFormatter {
 
     printer.println(printStream, "");
     printer.printHeading(printStream, colors, "=", AnsiColors.BRIGHT_GREEN);
-    printer.println(printStream, 
-        colors.colorize("Running tests with " + title, AnsiColors.GREEN));
+    printer.println(printStream, colors.colorize("Running tests with " + title, AnsiColors.GREEN));
     printer.printHeading(printStream, colors, "-", AnsiColors.BRIGHT_GREEN);
 
     return baos.toString();

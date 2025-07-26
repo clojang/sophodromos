@@ -2,9 +2,7 @@ package io.github.clojang.sophodromos;
 
 import io.github.clojang.gradldromus.AnsiColors;
 
-/**
- * Handles progress line formatting with colors.
- */
+/** Handles progress line formatting with colors. */
 class ProgressFormatter {
   private static final String INDENT = "    ";
   private final AnsiColors colors;
@@ -26,7 +24,7 @@ class ProgressFormatter {
    */
   String formatLineByContent(final String line) {
     String result = colors.colorize(INDENT + line, AnsiColors.WHITE);
-    
+
     if (isSuccessLine(line)) {
       result = colors.colorize(INDENT + line, AnsiColors.BRIGHT_GREEN);
     } else if (isFailureLine(line)) {
@@ -36,7 +34,7 @@ class ProgressFormatter {
     } else if (isExecutionLine(line)) {
       result = colors.colorize(line, AnsiColors.BOLD, AnsiColors.BRIGHT_YELLOW);
     }
-    
+
     return result;
   }
 

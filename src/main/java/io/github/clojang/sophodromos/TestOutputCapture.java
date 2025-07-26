@@ -7,9 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import org.apache.maven.plugin.logging.Log;
 
-/**
- * Captures and processes test output from input and error streams.
- */
+/** Captures and processes test output from input and error streams. */
 class TestOutputCapture {
   private final TestExecutionInterceptor interceptor;
   private final boolean showProgress;
@@ -22,8 +20,8 @@ class TestOutputCapture {
    * @param showProgress whether to show progress during execution
    * @param log the Maven logger
    */
-  TestOutputCapture(final TestExecutionInterceptor interceptor, 
-      final boolean showProgress, final Log log) {
+  TestOutputCapture(
+      final TestExecutionInterceptor interceptor, final boolean showProgress, final Log log) {
     this.interceptor = interceptor;
     this.showProgress = showProgress;
     this.log = log;
@@ -36,8 +34,8 @@ class TestOutputCapture {
    * @param result the test execution result to populate
    * @return the capture thread
    */
-  Thread createOutputCaptureThread(final InputStream inputStream, 
-      final TestExecutionResult result) {
+  Thread createOutputCaptureThread(
+      final InputStream inputStream, final TestExecutionResult result) {
     return new Thread(() -> processOutputStream(inputStream, result));
   }
 
@@ -48,47 +46,44 @@ class TestOutputCapture {
    * @param result the test execution result to populate
    * @return the capture thread
    */
-  Thread createErrorCaptureThread(final InputStream errorStream, 
-      final TestExecutionResult result) {
+  Thread createErrorCaptureThread(final InputStream errorStream, final TestExecutionResult result) {
     return new Thread(() -> processErrorStream(errorStream, result));
   }
 
-  private void processOutputStream(final InputStream inputStream, 
-      final TestExecutionResult result) {
-    try (BufferedReader reader = 
-         new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+  private void processOutputStream(
+      final InputStream inputStream, final TestExecutionResult result) {
+    try (BufferedReader reader =
+        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
       processReaderLines(reader, result, false);
     } catch (final IOException e) {
       log.error("Error reading test output", e);
     }
   }
 
-  private void processErrorStream(final InputStream errorStream, 
-      final TestExecutionResult result) {
-    try (BufferedReader reader = 
-         new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8))) {
+  private void processErrorStream(final InputStream errorStream, final TestExecutionResult result) {
+    try (BufferedReader reader =
+        new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8))) {
       processReaderLines(reader, result, true);
     } catch (final IOException e) {
       log.error("Error reading test error output", e);
     }
   }
 
-  private void processReaderLines(final BufferedReader reader, 
-      final TestExecutionResult result, final boolean isError) 
+  private void processReaderLines(
+      final BufferedReader reader, final TestExecutionResult result, final boolean isError)
       throws IOException {
     String line = reader.readLine();
     while (line != null) {
-      final String formattedLine = isError
-          ? interceptor.interceptErrorOutput(line)
-          : interceptor.interceptTestOutput(line);
-      
+      final String formattedLine =
+          isError ? interceptor.interceptErrorOutput(line) : interceptor.interceptTestOutput(line);
+
       processFormattedLine(formattedLine, result, isError);
       line = reader.readLine();
     }
   }
 
-  private void processFormattedLine(final String formattedLine, 
-      final TestExecutionResult result, final boolean isError) {
+  private void processFormattedLine(
+      final String formattedLine, final TestExecutionResult result, final boolean isError) {
     if (formattedLine != null) {
       if (isError) {
         result.addErrorLine(formattedLine);

@@ -4,13 +4,11 @@ import io.github.clojang.gradldromus.AnsiColors;
 import io.github.clojang.gradldromus.GradlDromusExtension;
 import java.util.Locale;
 
-/**
- * Handles individual test result formatting.
- */
+/** Handles individual test result formatting. */
 class TestResultFormatter {
   private static final String INDENT = "    ";
   private static final int DOTS_BASE = 76;
-  
+
   private final AnsiColors colors;
   private final GradlDromusExtension extension;
 
@@ -20,8 +18,7 @@ class TestResultFormatter {
    * @param colors the color formatter
    * @param extension the GradlDromus extension
    */
-  TestResultFormatter(final AnsiColors colors, 
-      final GradlDromusExtension extension) {
+  TestResultFormatter(final AnsiColors colors, final GradlDromusExtension extension) {
     this.colors = colors;
     this.extension = extension;
   }
@@ -36,8 +33,7 @@ class TestResultFormatter {
    * @return the formatted test result
    */
   String formatTestResult(
-      final String className, final String methodName, 
-      final String status, final long duration) {
+      final String className, final String methodName, final String status, final long duration) {
     final StringBuilder outputStr = new StringBuilder();
 
     // Indent
@@ -45,8 +41,7 @@ class TestResultFormatter {
 
     // Class name (white)
     if (className != null) {
-      final String simpleClassName = className.substring(
-          className.lastIndexOf('.') + 1);
+      final String simpleClassName = className.substring(className.lastIndexOf('.') + 1);
       outputStr.append(colors.colorize(simpleClassName + ".", AnsiColors.WHITE));
     }
 
@@ -85,18 +80,17 @@ class TestResultFormatter {
     switch (status.toUpperCase(Locale.ROOT)) {
       case "PASS":
       case "SUCCESS":
-        result = new StatusInfo(extension.getPassSymbol(), 
-            AnsiColors.BOLD + AnsiColors.BRIGHT_GREEN);
+        result =
+            new StatusInfo(extension.getPassSymbol(), AnsiColors.BOLD + AnsiColors.BRIGHT_GREEN);
         break;
       case "FAIL":
       case "FAILURE":
-        result = new StatusInfo(extension.getFailSymbol(), 
-            AnsiColors.BOLD + AnsiColors.BRIGHT_RED);
+        result = new StatusInfo(extension.getFailSymbol(), AnsiColors.BOLD + AnsiColors.BRIGHT_RED);
         break;
       case "SKIP":
       case "SKIPPED":
-        result = new StatusInfo(extension.getSkipSymbol(), 
-            AnsiColors.BOLD + AnsiColors.BRIGHT_CYAN);
+        result =
+            new StatusInfo(extension.getSkipSymbol(), AnsiColors.BOLD + AnsiColors.BRIGHT_CYAN);
         break;
       default:
         result = new StatusInfo("?", AnsiColors.YELLOW);
@@ -105,9 +99,7 @@ class TestResultFormatter {
     return result;
   }
 
-  /**
-   * Container for status information including symbol and color.
-   */
+  /** Container for status information including symbol and color. */
   static class StatusInfo {
     final String symbol;
     final String color;

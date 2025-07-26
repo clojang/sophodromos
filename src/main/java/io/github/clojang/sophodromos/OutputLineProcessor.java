@@ -2,9 +2,7 @@ package io.github.clojang.sophodromos;
 
 import org.apache.maven.project.MavenProject;
 
-/**
- * Processes and filters output lines that don't match specific patterns.
- */
+/** Processes and filters output lines that don't match specific patterns. */
 class OutputLineProcessor {
   private final MavenProject project;
   private final TestOutputFormatter formatter;
@@ -15,8 +13,7 @@ class OutputLineProcessor {
    * @param project the Maven project
    * @param formatter the output formatter
    */
-  OutputLineProcessor(final MavenProject project, 
-      final TestOutputFormatter formatter) {
+  OutputLineProcessor(final MavenProject project, final TestOutputFormatter formatter) {
     this.project = project;
     this.formatter = formatter;
   }
@@ -50,9 +47,7 @@ class OutputLineProcessor {
   }
 
   private boolean isAssertionFailure(final String line) {
-    return line.contains("AssertionError") 
-        || line.contains("Expected") 
-        || line.contains("Actual");
+    return line.contains("AssertionError") || line.contains("Expected") || line.contains("Actual");
   }
 
   private boolean isStackTrace(final String line) {

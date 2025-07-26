@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.maven.project.MavenProject;
 
-/**
- * Manages the creation and configuration of Maven Surefire test processes.
- */
+/** Manages the creation and configuration of Maven Surefire test processes. */
 class TestProcessManager {
   private final MavenProject project;
 

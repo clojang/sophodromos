@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Holds the results of test execution. */
-@SuppressWarnings({"PMD.DataClass", "PMD.TestClassWithoutTestCases"}) 
+@SuppressWarnings({"PMD.DataClass", "PMD.TestClassWithoutTestCases"})
 // This is not a test class, it's a data holder
 public class TestExecutionResult {
 
@@ -23,8 +23,8 @@ public class TestExecutionResult {
   private int exitCode;
 
   /**
-   * Default constructor - all fields initialized to default values.
-   * Explicit constructor added to satisfy PMD AtLeastOneConstructor rule.
+   * Default constructor - all fields initialized to default values. Explicit constructor added to
+   * satisfy PMD AtLeastOneConstructor rule.
    */
   public TestExecutionResult() {
     // Using default initialization for all fields

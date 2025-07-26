@@ -3,20 +3,15 @@ package io.github.clojang.sophodromos;
 import io.github.clojang.gradldromus.AnsiColors;
 import io.github.clojang.gradldromus.CleanTerminalPrinter;
 import io.github.clojang.gradldromus.GradlDromusExtension;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.Locale;
 
 /**
  * Test output formatter that uses GradlDromus formatting classes. Delegates all formatting to the
- * proven GradlDromus implementation
+ * proven GradlDromus implementation.
  */
 @SuppressWarnings("PMD.TestClassWithoutTestCases") // This is not a test class
 public class TestOutputFormatter {
 
-  private static final String INDENT = "    ";
   private static final int SUMMARY_LENGTH = 200;
-  private static final int DOTS_BASE = 76;
 
   private final GradlDromusExtension extension;
   private final AnsiColors colors;
@@ -126,9 +121,10 @@ public class TestOutputFormatter {
         .append(executionTimeMs / 1000.0)
         .append('s');
 
-    final String resultMessage = (failed == 0 && errors == 0)
-        ? colors.colorize("✨ All tests passed!", AnsiColors.BRIGHT_GREEN)
-        : colors.colorize("❌ Some tests failed.", AnsiColors.BRIGHT_RED);
+    final String resultMessage =
+        (failed == 0 && errors == 0)
+            ? colors.colorize("✨ All tests passed!", AnsiColors.BRIGHT_GREEN)
+            : colors.colorize("❌ Some tests failed.", AnsiColors.BRIGHT_RED);
 
     summary.append("\n\n").append(resultMessage);
 
@@ -190,168 +186,5 @@ public class TestOutputFormatter {
 
   public CleanTerminalPrinter getPrinter() {
     return printer;
-  }
-}
-
-/**
- * Handles header and footer formatting.
- */
-class HeaderFooterFormatter {
-  private final CleanTerminalPrinter printer;
-  private final AnsiColors colors;
-
-  HeaderFooterFormatter(final CleanTerminalPrinter printer, 
-      final AnsiColors colors) {
-    this.printer = printer;
-    this.colors = colors;
-  }
-
-  String formatHeader(final String title) {
-    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final PrintStream printStream = new PrintStream(baos);
-
-    printer.println(printStream, "");
-    printer.printHeading(printStream, colors, "=", AnsiColors.BRIGHT_GREEN);
-    printer.println(printStream, 
-        colors.colorize("Running tests with " + title, AnsiColors.GREEN));
-    printer.printHeading(printStream, colors, "-", AnsiColors.BRIGHT_GREEN);
-
-    return baos.toString();
-  }
-
-  String formatFooter() {
-    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final PrintStream printStream = new PrintStream(baos);
-
-    printer.println(printStream, "");
-    printer.printHeading(printStream, colors, "=", AnsiColors.BRIGHT_GREEN);
-
-    return baos.toString();
-  }
-}
-
-/**
- * Handles progress line formatting with colors.
- */
-class ProgressFormatter {
-  private static final String INDENT = "    ";
-  private final AnsiColors colors;
-
-  ProgressFormatter(final AnsiColors colors) {
-    this.colors = colors;
-  }
-
-  String formatLineByContent(final String line) {
-    String result = colors.colorize(INDENT + line, AnsiColors.WHITE);
-    
-    if (isSuccessLine(line)) {
-      result = colors.colorize(INDENT + line, AnsiColors.BRIGHT_GREEN);
-    } else if (isFailureLine(line)) {
-      result = colors.colorize(INDENT + line, AnsiColors.BRIGHT_RED);
-    } else if (isSkipLine(line)) {
-      result = colors.colorize(INDENT + line, AnsiColors.BRIGHT_CYAN);
-    } else if (isExecutionLine(line)) {
-      result = colors.colorize(line, AnsiColors.BOLD, AnsiColors.BRIGHT_YELLOW);
-    }
-    
-    return result;
-  }
-
-  private boolean isSuccessLine(final String line) {
-    return line.contains("✅") || line.contains("PASS") || line.contains("OK");
-  }
-
-  private boolean isFailureLine(final String line) {
-    return line.contains("❌") || line.contains("FAIL") || line.contains("ERROR");
-  }
-
-  private boolean isSkipLine(final String line) {
-    return line.contains("⊝") || line.contains("SKIP");
-  }
-
-  private boolean isExecutionLine(final String line) {
-    return line.contains("🧪");
-  }
-}
-
-/**
- * Handles individual test result formatting.
- */
-class TestResultFormatter {
-  private static final String INDENT = "    ";
-  private static final int DOTS_BASE = 76;
-  
-  private final AnsiColors colors;
-  private final GradlDromusExtension extension;
-
-  TestResultFormatter(final AnsiColors colors, 
-      final GradlDromusExtension extension) {
-    this.colors = colors;
-    this.extension = extension;
-  }
-
-  String formatTestResult(
-      final String className, final String methodName, final String status, final long duration) {
-    final StringBuilder outputStr = new StringBuilder();
-
-    // Indent
-    outputStr.append(INDENT);
-
-    // Class name (white)
-    if (className != null) {
-      final String simpleClassName = className.substring(
-          className.lastIndexOf('.') + 1);
-      outputStr.append(colors.colorize(simpleClassName + ".", AnsiColors.WHITE));
-    }
-
-    // Method name (yellow)
-    outputStr.append(colors.colorize(methodName + " ", AnsiColors.YELLOW));
-
-    // Calculate dots needed (similar to GradlDromus)
-    final int dotsNeeded = calculateDotsNeeded(className, methodName);
-    outputStr.append(colors.colorize(".".repeat(dotsNeeded), AnsiColors.BRIGHT_BLACK));
-
-    // Status symbol and color
-    final StatusInfo statusInfo = getStatusInfo(status);
-    outputStr.append(colors.colorize(statusInfo.symbol, statusInfo.color));
-
-    // Timing (if enabled)
-    if (extension.isShowTimings() && duration > 0) {
-      outputStr
-          .append(' ')
-          .append(colors.colorize("(" + duration + "ms)", AnsiColors.BRIGHT_BLACK));
-    }
-
-    return outputStr.toString();
-  }
-
-  private int calculateDotsNeeded(final String className, final String methodName) {
-    int nameLength = INDENT.length(); // indent
-    if (className != null) {
-      nameLength += className.substring(className.lastIndexOf('.') + 1).length() + 1;
-    }
-    nameLength += methodName.length() + 1;
-    return Math.max(1, DOTS_BASE - nameLength);
-  }
-
-  private StatusInfo getStatusInfo(final String status) {
-    StatusInfo result;
-    switch (status.toUpperCase(Locale.ROOT)) {
-      case "PASS":
-      case "SUCCESS":
-        result = new StatusInfo(extension.getPassSymbol(), AnsiColors.BOLD + AnsiColors.BRIGHT_GREEN);
-        break;
-      case "FAIL":
-      case "FAILURE":
-        result = new StatusInfo(extension.getFailSymbol(), AnsiColors.BOLD + AnsiColors.BRIGHT_RED);
-        break;
-      case "SKIP":
-      case "SKIPPED":
-        result = new StatusInfo(extension.getSkipSymbol(), AnsiColors.BOLD + AnsiColors.BRIGHT_CYAN);
-        break;
-      default:
-        result = new StatusInfo("?", AnsiColors.YELLOW);
-        break;
-    }
   }
 }
