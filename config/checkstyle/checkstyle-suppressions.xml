@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <!-- Suppress certain checks for test files -->
+    <suppress checks="DesignForExtension" files=".*Test\.java"/>
+    <suppress checks="FinalParameters" files=".*Test\.java"/>
+    
+    <!-- Suppress checks for demo test files -->
+    <suppress checks="." files=".*demo.*Test.*\.java"/>
+    
+    <!-- Allow utility classes in test packages -->
+    <suppress checks="HideUtilityClassConstructor" files=".*Test\.java"/>
+    
+    <!-- Relax rules for Gradle plugin extension classes (designed to be configured by users) -->
+    <suppress checks="DesignForExtension" files=".*Extension\.java"/>
+    <suppress checks="FinalParameters" files=".*Extension\.java"/>
+    <suppress checks="MagicNumber" files=".*Extension\.java"/>
+    
+    <!-- Relax rules for listener classes (implement Gradle interfaces) -->
+    <suppress checks="DesignForExtension" files=".*Listener\.java"/>
+    <suppress checks="FinalParameters" files=".*Listener\.java"/>
+
+    <!-- Allow missing switch defaults when enum handling is complete -->
+    <suppress checks="MissingSwitchDefault" files=".*\.java"/>
+    
+    <!-- Allow operator wrapping flexibility -->
+    <suppress checks="OperatorWrap" files=".*\.java"/>
+    
+
+</suppressions>

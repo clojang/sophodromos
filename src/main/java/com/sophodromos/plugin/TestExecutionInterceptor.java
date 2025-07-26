@@ -8,28 +8,32 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Intercepts and processes test execution output
+ * Intercepts and processes test execution output using GradlDromus formatting
  */
 public class TestExecutionInterceptor {
     
     private final MavenProject project;
     private final MavenSession session;
     private final Log log;
+    private final TestOutputFormatter formatter;
     
     // Patterns for common test output formats
     private static final Pattern TEST_RUNNING_PATTERN = Pattern.compile("^Running (.+)$");
     private static final Pattern TEST_RESULT_PATTERN = Pattern.compile("^Tests run: (\\d+), Failures: (\\d+), Errors: (\\d+), Skipped: (\\d+), Time elapsed: ([\\d.]+) sec");
-    private static final Pattern FAILURE_PATTERN = Pattern.compile("^FAILURE:.*");
-    private static final Pattern ERROR_PATTERN = Pattern.compile("^ERROR:.*");
+    private static final Pattern INDIVIDUAL_TEST_PATTERN = Pattern.compile("^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+sec\\s+<<<\\s+(FAILURE|ERROR)!");
+    private static final Pattern INDIVIDUAL_TEST_SUCCESS_PATTERN = Pattern.compile("^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+sec$");
     
-    public TestExecutionInterceptor(MavenProject project, MavenSession session, Log log) {
+    public TestExecutionInterceptor(MavenProject project, MavenSession session, Log log, TestOutputFormatter formatter) {
         this.project = project;
         this.session = session;
         this.log = log;
+        this.formatter = formatter;
     }
     
     public String interceptTestOutput(String line) {
-        // TODO: Transform standard test output here to change its format
+        if (line == null || line.trim().isEmpty()) {
+            return line;
+        }
         
         // Detect test class execution
         Matcher runningMatcher = TEST_RUNNING_PATTERN.matcher(line);
@@ -38,7 +42,26 @@ public class TestExecutionInterceptor {
             return formatTestClassExecution(testClass);
         }
         
-        // Detect test results
+        // Detect individual test results (failures/errors)
+        Matcher individualTestMatcher = INDIVIDUAL_TEST_PATTERN.matcher(line);
+        if (individualTestMatcher.matches()) {
+            String methodName = individualTestMatcher.group(1);
+            String className = individualTestMatcher.group(2);
+            double timeElapsed = Double.parseDouble(individualTestMatcher.group(3));
+            String status = individualTestMatcher.group(4);
+            return formatter.formatTestResult(className, methodName, status, (long)(timeElapsed * 1000));
+        }
+        
+        // Detect individual test results (success)
+        Matcher individualTestSuccessMatcher = INDIVIDUAL_TEST_SUCCESS_PATTERN.matcher(line);
+        if (individualTestSuccessMatcher.matches()) {
+            String methodName = individualTestSuccessMatcher.group(1);
+            String className = individualTestSuccessMatcher.group(2);
+            double timeElapsed = Double.parseDouble(individualTestSuccessMatcher.group(3));
+            return formatter.formatTestResult(className, methodName, "SUCCESS", (long)(timeElapsed * 1000));
+        }
+        
+        // Detect test results summary
         Matcher resultMatcher = TEST_RESULT_PATTERN.matcher(line);
         if (resultMatcher.matches()) {
             return formatTestResults(
@@ -55,27 +78,19 @@ public class TestExecutionInterceptor {
     }
     
     public String interceptErrorOutput(String line) {
-        // TODO: Transform error output here to change its format
-        
-        if (FAILURE_PATTERN.matcher(line).matches()) {
-            return formatFailureLine(line);
+        if (line == null || line.trim().isEmpty()) {
+            return line;
         }
         
-        if (ERROR_PATTERN.matcher(line).matches()) {
-            return formatErrorLine(line);
-        }
-        
-        return preprocessErrorLine(line);
+        return formatter.formatErrorLine(line);
     }
     
     private String formatTestClassExecution(String testClass) {
-        // TODO: Customize how test class execution is displayed
         String simpleName = testClass.substring(testClass.lastIndexOf('.') + 1);
-        return String.format("🧪 Executing %s...", simpleName);
+        return formatter.formatProgressLine("🧪 Executing " + simpleName + "...");
     }
     
     private String formatTestResults(int testsRun, int failures, int errors, int skipped, double timeElapsed) {
-        // TODO: Customize how test results are displayed
         StringBuilder result = new StringBuilder();
         
         if (failures == 0 && errors == 0) {
@@ -100,41 +115,31 @@ public class TestExecutionInterceptor {
         
         result.append(String.format(" (%.3fs)", timeElapsed));
         
-        return result.toString();
-    }
-    
-    private String formatFailureLine(String line) {
-        // TODO: Customize how failure lines are displayed
-        return "💥 " + line;
-    }
-    
-    private String formatErrorLine(String line) {
-        // TODO: Customize how error lines are displayed
-        return "🚨 " + line;
+        return formatter.formatProgressLine(result.toString());
     }
     
     private String preprocessOutputLine(String line) {
-        // TODO: Apply general transformations to output lines here
-        
-        // Example: Remove Maven noise
-        if (line.contains("[INFO]") || line.contains("[DEBUG]")) {
+        // Skip Maven noise
+        if (line.contains("[INFO]") || line.contains("[DEBUG]") || line.contains("[WARNING]")) {
             return null; // Skip these lines
         }
         
-        // Example: Enhance assertion failures
-        if (line.contains("AssertionError") || line.contains("Expected") || line.contains("Actual")) {
-            return "📋 " + line.trim();
+        // Skip empty lines and dashes
+        if (line.trim().isEmpty() || line.matches("^-+$")) {
+            return null;
         }
         
-        return line;
-    }
-    
-    private String preprocessErrorLine(String line) {
-        // TODO: Apply general transformations to error lines here
+        // Format assertion failures and stack traces
+        if (line.contains("AssertionError") || line.contains("Expected") || line.contains("Actual")) {
+            return formatter.formatErrorLine(line.trim());
+        }
         
-        // Example: Clean up stack traces
-        if (line.trim().startsWith("at ") && !line.contains(project.getGroupId())) {
-            return null; // Skip external stack trace lines
+        if (line.trim().startsWith("at ")) {
+            // Only show stack traces from our project
+            if (line.contains(project.getGroupId()) || line.contains("Test")) {
+                return formatter.formatErrorLine("  " + line.trim());
+            }
+            return null; // Skip external stack traces
         }
         
         return line;

@@ -6,16 +6,13 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
-import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.AnsiConsole;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
- * SophoDromos Test Mojo - Intercepts and formats test execution output
+ * SophoDromos Test Mojo - Provides GradlDromus-style test formatting for Maven
  */
 @Mojo(
     name = "test",
@@ -53,16 +50,11 @@ public class SophoDromosTestMojo extends AbstractMojo {
             return;
         }
 
-        // Initialize ANSI console for colored output
-        if (colorOutput) {
-            AnsiConsole.systemInstall();
-        }
-
         try {
             formatter = new TestOutputFormatter(colorOutput, detailedFailures);
-            interceptor = new TestExecutionInterceptor(project, session, getLog());
+            interceptor = new TestExecutionInterceptor(project, session, getLog(), formatter);
             
-            getLog().info(formatter.formatHeader("SophoDromos Test Runner"));
+            System.out.println(formatter.formatHeader("SophoDromos Test Runner (powered by GradlDromus)"));
             
             // Execute tests with interception
             TestExecutionResult result = executeTestsWithInterception();
@@ -75,55 +67,47 @@ public class SophoDromosTestMojo extends AbstractMojo {
                 throw new MojoFailureException("Tests failed: " + result.getFailureCount() + " failures, " + result.getErrorCount() + " errors");
             }
             
-        } finally {
-            if (colorOutput) {
-                AnsiConsole.systemUninstall();
-            }
-        }
-    }
-
-    private TestExecutionResult executeTestsWithInterception() throws MojoExecutionException {
-        try {
-            getLog().info("Starting test execution...");
-            
-            // Create process builder for surefire execution
-            ProcessBuilder pb = createSurefireProcessBuilder();
-            
-            // Start process and capture output
-            Process process = pb.start();
-            
-            TestExecutionResult result = new TestExecutionResult();
-            
-            // Create output capture threads
-            Thread outputThread = createOutputCaptureThread(process.getInputStream(), result);
-            Thread errorThread = createErrorCaptureThread(process.getErrorStream(), result);
-            
-            outputThread.start();
-            errorThread.start();
-            
-            // Wait for process completion
-            int exitCode = process.waitFor();
-            
-            // Wait for output threads to complete
-            outputThread.join(5000);
-            errorThread.join(5000);
-            
-            result.setExitCode(exitCode);
-            return result;
-            
         } catch (Exception e) {
             throw new MojoExecutionException("Failed to execute tests", e);
         }
     }
 
+    private TestExecutionResult executeTestsWithInterception() throws Exception {
+        getLog().info("Starting test execution...");
+        
+        // Create process builder for surefire execution
+        ProcessBuilder pb = createSurefireProcessBuilder();
+        
+        // Start process and capture output
+        Process process = pb.start();
+        
+        TestExecutionResult result = new TestExecutionResult();
+        
+        // Create output capture threads
+        Thread outputThread = createOutputCaptureThread(process.getInputStream(), result);
+        Thread errorThread = createErrorCaptureThread(process.getErrorStream(), result);
+        
+        outputThread.start();
+        errorThread.start();
+        
+        // Wait for process completion
+        int exitCode = process.waitFor();
+        
+        // Wait for output threads to complete
+        outputThread.join(5000);
+        errorThread.join(5000);
+        
+        result.setExitCode(exitCode);
+        return result;
+    }
+
     private ProcessBuilder createSurefireProcessBuilder() {
         List<String> command = new ArrayList<>();
         
-        // TODO: Configure Maven command with surefire plugin
-        // Add your custom Maven execution parameters here
         command.add("mvn");
         command.add("surefire:test");
         command.add("-q"); // Quiet mode to reduce noise
+        command.add("-Dmaven.test.failure.ignore=true"); // Don't fail immediately on test failures
         
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.directory(project.getBasedir());
@@ -137,12 +121,13 @@ public class SophoDromosTestMojo extends AbstractMojo {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // TODO: Transform test output here to change its format
                     String formattedLine = interceptor.interceptTestOutput(line);
-                    result.addOutputLine(formattedLine);
-                    
-                    if (showProgress) {
-                        System.out.println(formatter.formatProgressLine(formattedLine));
+                    if (formattedLine != null) {
+                        result.addOutputLine(formattedLine);
+                        
+                        if (showProgress) {
+                            System.out.println(formattedLine);
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -156,11 +141,11 @@ public class SophoDromosTestMojo extends AbstractMojo {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // TODO: Transform error output here to change its format
                     String formattedLine = interceptor.interceptErrorOutput(line);
-                    result.addErrorLine(formattedLine);
-                    
-                    System.err.println(formatter.formatErrorLine(formattedLine));
+                    if (formattedLine != null) {
+                        result.addErrorLine(formattedLine);
+                        System.err.println(formattedLine);
+                    }
                 }
             } catch (IOException e) {
                 getLog().error("Error reading test error output", e);
@@ -169,10 +154,8 @@ public class SophoDromosTestMojo extends AbstractMojo {
     }
 
     private void displayFormattedResults(TestExecutionResult result) {
-        getLog().info("");
-        getLog().info(formatter.formatSummaryHeader());
+        System.out.println(formatter.formatSummaryHeader());
         
-        // TODO: Customize result summary formatting here
         String summary = formatter.formatTestSummary(
             result.getTotalTests(),
             result.getPassedTests(),
@@ -182,18 +165,16 @@ public class SophoDromosTestMojo extends AbstractMojo {
             result.getExecutionTime()
         );
         
-        getLog().info(summary);
+        System.out.println(summary);
         
         if (result.hasFailures() && detailedFailures) {
-            getLog().info("");
-            getLog().info(formatter.formatFailureHeader());
+            System.out.println(formatter.formatFailureHeader());
             
             for (String failure : result.getFailures()) {
-                // TODO: Transform failure output here to change its format
-                getLog().info(formatter.formatFailureDetail(failure));
+                System.out.println(formatter.formatFailureDetail(failure));
             }
         }
         
-        getLog().info(formatter.formatFooter());
+        System.out.println(formatter.formatFooter());
     }
 }
