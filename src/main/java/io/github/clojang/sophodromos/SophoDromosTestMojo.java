@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.maven.execution.MavenSession;
@@ -16,15 +17,12 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-/**
- * SophoDromos Test Mojo - Provides GradlDromus-style test formatting for Maven.
- */
+/** SophoDromos Test Mojo - Provides GradlDromus-style test formatting for Maven. */
 @Mojo(
     name = "test",
     defaultPhase = LifecyclePhase.TEST,
     requiresDependencyResolution = ResolutionScope.TEST,
-    threadSafe = true
-)
+    threadSafe = true)
 public class SophoDromosTestMojo extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
@@ -57,10 +55,10 @@ public class SophoDromosTestMojo extends AbstractMojo {
 
     try {
       formatter = new TestOutputFormatter(colorOutput, detailedFailures);
-      interceptor = new TestExecutionInterceptor(project, session, getLog(), formatter);
+      interceptor = new TestExecutionInterceptor(project, formatter);
 
-      System.out.println(formatter.formatHeader(
-          "SophoDromos Test Runner (powered by GradlDromus)"));
+      System.out.println(
+          formatter.formatHeader("SophoDromos Test Runner (powered by GradlDromus)"));
 
       // Execute tests with interception
       TestExecutionResult result = executeTestsWithInterception();
@@ -70,16 +68,26 @@ public class SophoDromosTestMojo extends AbstractMojo {
 
       // Fail build if tests failed
       if (result.hasFailures()) {
-        throw new MojoFailureException("Tests failed: " + result.getFailureCount() 
-            + " failures, " + result.getErrorCount() + " errors");
+        throw new MojoFailureException(
+            "Tests failed: "
+                + result.getFailureCount()
+                + " failures, "
+                + result.getErrorCount()
+                + " errors");
       }
 
-    } catch (Exception e) {
-      throw new MojoExecutionException("Failed to execute tests", e);
+    } catch (MojoExecutionException | MojoFailureException e) {
+      throw e;
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new MojoExecutionException("Test execution was interrupted", e);
+    } catch (IOException e) {
+      throw new MojoExecutionException("IO error during test execution", e);
     }
   }
 
-  private TestExecutionResult executeTestsWithInterception() throws Exception {
+  private TestExecutionResult executeTestsWithInterception()
+      throws IOException, InterruptedException {
     getLog().info("Starting test execution...");
 
     // Create process builder for surefire execution
@@ -124,53 +132,57 @@ public class SophoDromosTestMojo extends AbstractMojo {
   }
 
   private Thread createOutputCaptureThread(InputStream inputStream, TestExecutionResult result) {
-    return new Thread(() -> {
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-          String formattedLine = interceptor.interceptTestOutput(line);
-          if (formattedLine != null) {
-            result.addOutputLine(formattedLine);
+    return new Thread(
+        () -> {
+          try (BufferedReader reader =
+              new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+              String formattedLine = interceptor.interceptTestOutput(line);
+              if (formattedLine != null) {
+                result.addOutputLine(formattedLine);
 
-            if (showProgress) {
-              System.out.println(formattedLine);
+                if (showProgress) {
+                  System.out.println(formattedLine);
+                }
+              }
             }
+          } catch (IOException e) {
+            getLog().error("Error reading test output", e);
           }
-        }
-      } catch (IOException e) {
-        getLog().error("Error reading test output", e);
-      }
-    });
+        });
   }
 
   private Thread createErrorCaptureThread(InputStream errorStream, TestExecutionResult result) {
-    return new Thread(() -> {
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-          String formattedLine = interceptor.interceptErrorOutput(line);
-          if (formattedLine != null) {
-            result.addErrorLine(formattedLine);
-            System.err.println(formattedLine);
+    return new Thread(
+        () -> {
+          try (BufferedReader reader =
+              new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+              String formattedLine = interceptor.interceptErrorOutput(line);
+              if (formattedLine != null) {
+                result.addErrorLine(formattedLine);
+                System.err.println(formattedLine);
+              }
+            }
+          } catch (IOException e) {
+            getLog().error("Error reading test error output", e);
           }
-        }
-      } catch (IOException e) {
-        getLog().error("Error reading test error output", e);
-      }
-    });
+        });
   }
 
   private void displayFormattedResults(TestExecutionResult result) {
     System.out.println(formatter.formatSummaryHeader());
 
-    String summary = formatter.formatTestSummary(
-        result.getTotalTests(),
-        result.getPassedTests(),
-        result.getFailedTests(),
-        result.getErrorTests(),
-        result.getSkippedTests(),
-        result.getExecutionTime()
-    );
+    String summary =
+        formatter.formatTestSummary(
+            result.getTotalTests(),
+            result.getPassedTests(),
+            result.getFailedTests(),
+            result.getErrorTests(),
+            result.getSkippedTests(),
+            result.getExecutionTime());
 
     System.out.println(summary);
 

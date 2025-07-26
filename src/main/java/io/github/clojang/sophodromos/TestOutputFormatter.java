@@ -7,15 +7,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 /**
- * Test output formatter that uses GradlDromus formatting classes.
- * Delegates all formatting to the proven GradlDromus implementation
+ * Test output formatter that uses GradlDromus formatting classes. Delegates all formatting to the
+ * proven GradlDromus implementation
  */
 public class TestOutputFormatter {
 
   private final GradlDromusExtension extension;
   private final AnsiColors colors;
   private final CleanTerminalPrinter printer;
-  private final boolean detailedFailures;
 
   /**
    * Constructs a new TestOutputFormatter.
@@ -24,8 +23,6 @@ public class TestOutputFormatter {
    * @param detailedFailures whether to show detailed failure information
    */
   public TestOutputFormatter(boolean colorOutput, boolean detailedFailures) {
-    this.detailedFailures = detailedFailures;
-
     // Create GradlDromus extension with our preferences
     this.extension = new GradlDromusExtension();
     this.extension.setUseColors(colorOutput);
@@ -96,8 +93,8 @@ public class TestOutputFormatter {
    * @return the formatted summary header
    */
   public String formatSummaryHeader() {
-    return colors.colorize("\nTest Summary:", AnsiColors.BLUE) 
-        + "\n" 
+    return colors.colorize("\nTest Summary:", AnsiColors.BLUE)
+        + "\n"
         + colors.colorize("─────────────", AnsiColors.BLUE);
   }
 
@@ -112,28 +109,25 @@ public class TestOutputFormatter {
    * @param executionTimeMs the execution time in milliseconds
    * @return the formatted summary
    */
-  public String formatTestSummary(int total, int passed, int failed, int errors, 
-      int skipped, long executionTimeMs) {
+  public String formatTestSummary(
+      int total, int passed, int failed, int errors, int skipped, long executionTimeMs) {
     StringBuilder summary = new StringBuilder();
 
     summary.append(colors.colorize("Total: " + total + " tests, ", AnsiColors.WHITE));
-    summary.append(colors.colorize(extension.getPassSymbol() + " " + passed 
-        + " passed, ", AnsiColors.GREEN));
-    summary.append(colors.colorize(extension.getFailSymbol() + " " + failed 
-        + " failed, ", AnsiColors.RED));
-    summary.append(colors.colorize(extension.getSkipSymbol() + " " + skipped 
-        + " skipped", AnsiColors.CYAN));
+    summary.append(
+        colors.colorize(extension.getPassSymbol() + " " + passed + " passed, ", AnsiColors.GREEN));
+    summary.append(
+        colors.colorize(extension.getFailSymbol() + " " + failed + " failed, ", AnsiColors.RED));
+    summary.append(
+        colors.colorize(extension.getSkipSymbol() + " " + skipped + " skipped", AnsiColors.CYAN));
 
     summary.append("\n");
-    summary.append(colors.colorize("Time: ", AnsiColors.WHITE) 
-        + (executionTimeMs / 1000.0) + "s");
+    summary.append(colors.colorize("Time: ", AnsiColors.WHITE) + (executionTimeMs / 1000.0) + "s");
 
     if (failed == 0 && errors == 0) {
-      summary.append("\n\n" + colors.colorize("✨ All tests passed!", 
-          AnsiColors.BRIGHT_GREEN));
+      summary.append("\n\n" + colors.colorize("✨ All tests passed!", AnsiColors.BRIGHT_GREEN));
     } else {
-      summary.append("\n\n" + colors.colorize("❌ Some tests failed.", 
-          AnsiColors.BRIGHT_RED));
+      summary.append("\n\n" + colors.colorize("❌ Some tests failed.", AnsiColors.BRIGHT_RED));
     }
 
     return summary.toString();
@@ -145,7 +139,7 @@ public class TestOutputFormatter {
    * @return the formatted failure header
    */
   public String formatFailureHeader() {
-    return colors.colorize("\nFailure Details:", AnsiColors.RED) 
+    return colors.colorize("\nFailure Details:", AnsiColors.RED)
         + "\n"
         + colors.colorize("═══════════════", AnsiColors.RED);
   }
@@ -184,8 +178,8 @@ public class TestOutputFormatter {
    * @param duration the test duration in milliseconds
    * @return the formatted test result
    */
-  public String formatTestResult(String className, String methodName, String status, 
-      long duration) {
+  public String formatTestResult(
+      String className, String methodName, String status, long duration) {
     StringBuilder outputStr = new StringBuilder();
 
     // Indent
@@ -237,8 +231,9 @@ public class TestOutputFormatter {
 
     // Timing (if enabled)
     if (extension.isShowTimings() && duration > 0) {
-      outputStr.append(" ").append(colors.colorize("(" + duration + "ms)", 
-          AnsiColors.BRIGHT_BLACK));
+      outputStr
+          .append(" ")
+          .append(colors.colorize("(" + duration + "ms)", AnsiColors.BRIGHT_BLACK));
     }
 
     return outputStr.toString();

@@ -6,9 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Assume;
 import org.junit.Test;
 
-/**
- * Sample test class to demonstrate SophoDromos output formatting.
- */
+/** Sample test class to demonstrate SophoDromos output formatting. */
 public class SampleTest {
 
   @Test

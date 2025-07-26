@@ -2,45 +2,34 @@ package io.github.clojang.sophodromos;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
-/**
- * Intercepts and processes test execution output using GradlDromus formatting.
- */
+/** Intercepts and processes test execution output using GradlDromus formatting. */
 public class TestExecutionInterceptor {
 
   private final MavenProject project;
-  private final MavenSession session;
-  private final Log log;
   private final TestOutputFormatter formatter;
 
   // Patterns for common test output formats
-  private static final Pattern TEST_RUNNING_PATTERN = 
-      Pattern.compile("^Running (.+)$");
-  private static final Pattern TEST_RESULT_PATTERN = 
-      Pattern.compile("^Tests run: (\\d+), Failures: (\\d+), Errors: (\\d+), "
-          + "Skipped: (\\d+), Time elapsed: ([\\d.]+) sec");
-  private static final Pattern INDIVIDUAL_TEST_PATTERN = 
-      Pattern.compile("^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+sec"
-          + "\\s+<<<\\s+(FAILURE|ERROR)!");
-  private static final Pattern INDIVIDUAL_TEST_SUCCESS_PATTERN = 
+  private static final Pattern TEST_RUNNING_PATTERN = Pattern.compile("^Running (.+)$");
+  private static final Pattern TEST_RESULT_PATTERN =
+      Pattern.compile(
+          "^Tests run: (\\d+), Failures: (\\d+), Errors: (\\d+), "
+              + "Skipped: (\\d+), Time elapsed: ([\\d.]+) sec");
+  private static final Pattern INDIVIDUAL_TEST_PATTERN =
+      Pattern.compile(
+          "^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+sec" + "\\s+<<<\\s+(FAILURE|ERROR)!");
+  private static final Pattern INDIVIDUAL_TEST_SUCCESS_PATTERN =
       Pattern.compile("^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+sec$");
 
   /**
    * Constructs a new TestExecutionInterceptor.
    *
    * @param project the Maven project
-   * @param session the Maven session
-   * @param log the Maven logger
    * @param formatter the test output formatter
    */
-  public TestExecutionInterceptor(MavenProject project, MavenSession session, 
-      Log log, TestOutputFormatter formatter) {
+  public TestExecutionInterceptor(MavenProject project, TestOutputFormatter formatter) {
     this.project = project;
-    this.session = session;
-    this.log = log;
     this.formatter = formatter;
   }
 
@@ -69,8 +58,7 @@ public class TestExecutionInterceptor {
       String className = individualTestMatcher.group(2);
       double timeElapsed = Double.parseDouble(individualTestMatcher.group(3));
       String status = individualTestMatcher.group(4);
-      return formatter.formatTestResult(className, methodName, status, 
-          (long) (timeElapsed * 1000));
+      return formatter.formatTestResult(className, methodName, status, (long) (timeElapsed * 1000));
     }
 
     // Detect individual test results (success)
@@ -79,8 +67,8 @@ public class TestExecutionInterceptor {
       String methodName = individualTestSuccessMatcher.group(1);
       String className = individualTestSuccessMatcher.group(2);
       double timeElapsed = Double.parseDouble(individualTestSuccessMatcher.group(3));
-      return formatter.formatTestResult(className, methodName, "SUCCESS", 
-          (long) (timeElapsed * 1000));
+      return formatter.formatTestResult(
+          className, methodName, "SUCCESS", (long) (timeElapsed * 1000));
     }
 
     // Detect test results summary
@@ -92,7 +80,7 @@ public class TestExecutionInterceptor {
           Integer.parseInt(resultMatcher.group(3)), // errors
           Integer.parseInt(resultMatcher.group(4)), // skipped
           Double.parseDouble(resultMatcher.group(5)) // time
-      );
+          );
     }
 
     // Pass through other lines with potential modifications
@@ -118,8 +106,8 @@ public class TestExecutionInterceptor {
     return formatter.formatProgressLine("🧪 Executing " + simpleName + "...");
   }
 
-  private String formatTestResults(int testsRun, int failures, int errors, 
-      int skipped, double timeElapsed) {
+  private String formatTestResults(
+      int testsRun, int failures, int errors, int skipped, double timeElapsed) {
     StringBuilder result = new StringBuilder();
 
     if (failures == 0 && errors == 0) {
@@ -149,8 +137,7 @@ public class TestExecutionInterceptor {
 
   private String preprocessOutputLine(String line) {
     // Skip Maven noise
-    if (line.contains("[INFO]") || line.contains("[DEBUG]") 
-        || line.contains("[WARNING]")) {
+    if (line.contains("[INFO]") || line.contains("[DEBUG]") || line.contains("[WARNING]")) {
       return null; // Skip these lines
     }
 
@@ -160,8 +147,7 @@ public class TestExecutionInterceptor {
     }
 
     // Format assertion failures and stack traces
-    if (line.contains("AssertionError") || line.contains("Expected") 
-        || line.contains("Actual")) {
+    if (line.contains("AssertionError") || line.contains("Expected") || line.contains("Actual")) {
       return formatter.formatErrorLine(line.trim());
     }
 

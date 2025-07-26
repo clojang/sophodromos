@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0           http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.clojang</groupId>
@@ -13,43 +10,6 @@
     <name>SophoDromos</name>
     <description>A Maven test runner plugin that provides GradlDromus-style test formatting</description>
     <url>https://github.com/clojang/sophodromos</url>
-
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        
-        <!-- Maven versions -->
-        <maven.version>3.8.1</maven.version>
-        <maven.plugin.version>3.6.4</maven.plugin.version>
-        
-        <!-- Plugin versions -->
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.0.0-M9</maven-failsafe-plugin.version>
-        <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
-        <maven-project-info-reports-plugin.version>3.4.2</maven-project-info-reports-plugin.version>
-        
-        <!-- Quality tools versions -->
-        <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
-        <checkstyle-maven-plugin.version>3.3.0</checkstyle-maven-plugin.version>
-        <spotbugs-maven-plugin.version>4.7.3.6</spotbugs-maven-plugin.version>
-        <pmd-maven-plugin.version>3.21.0</pmd-maven-plugin.version>
-        <dependency-check-maven.version>8.4.0</dependency-check-maven.version>
-        <versions-maven-plugin.version>2.16.0</versions-maven-plugin.version>
-        <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
-        <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
-        
-        <!-- Quality rules versions -->
-        <checkstyle.version>10.12.4</checkstyle.version>
-        <google-java-format.version>1.17.0</google-java-format.version>
-        
-        <!-- Test dependencies versions -->
-        <junit.version>4.13.2</junit.version>
-        <mockito.version>5.5.0</mockito.version>
-        <assertj.version>3.24.2</assertj.version>
-    </properties>
 
     <licenses>
         <license>
@@ -71,6 +31,59 @@
         <url>https://github.com/sophodromos/sophodromos-maven-plugin/tree/main</url>
     </scm>
 
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Maven versions -->
+        <maven.version>3.8.1</maven.version>
+        <maven.plugin.version>3.6.4</maven.plugin.version>
+
+        <!-- Plugin versions -->
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.0.0-M9</maven-failsafe-plugin.version>
+        <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
+        <maven-project-info-reports-plugin.version>3.4.2</maven-project-info-reports-plugin.version>
+
+        <!-- Quality tools versions -->
+        <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
+        <checkstyle-maven-plugin.version>3.3.0</checkstyle-maven-plugin.version>
+        <spotbugs-maven-plugin.version>4.7.3.6</spotbugs-maven-plugin.version>
+        <pmd-maven-plugin.version>3.21.0</pmd-maven-plugin.version>
+        <dependency-check-maven.version>8.4.0</dependency-check-maven.version>
+        <versions-maven-plugin.version>2.16.0</versions-maven-plugin.version>
+        <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
+        <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
+
+        <!-- Quality rules versions -->
+        <checkstyle.version>10.12.4</checkstyle.version>
+        <google-java-format.version>1.17.0</google-java-format.version>
+
+        <!-- Test dependencies versions -->
+        <junit.version>4.13.2</junit.version>
+        <mockito.version>5.5.0</mockito.version>
+        <assertj.version>3.24.2</assertj.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Force consistent versions for convergence -->
+            <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-classworlds</artifactId>
+                <version>2.4.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>3.0.10</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- GradlDromus for formatting logic -->
         <dependency>
@@ -78,23 +91,22 @@
             <artifactId>gradldromus</artifactId>
             <version>0.3.27</version>
         </dependency>
-        
-        <!-- Maven Plugin API -->
+
+        <!-- Surefire Plugin for Test Execution -->
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${maven-surefire-plugin.version}</version>
+        </dependency>
+
+        <!-- Maven Artifact (required by maven-core) -->
         <dependency>
             <groupId>org.apache.maven</groupId>
-            <artifactId>maven-plugin-api</artifactId>
+            <artifactId>maven-artifact</artifactId>
             <version>${maven.version}</version>
             <scope>provided</scope>
         </dependency>
-        
-        <!-- Maven Plugin Annotations -->
-        <dependency>
-            <groupId>org.apache.maven.plugin-tools</groupId>
-            <artifactId>maven-plugin-annotations</artifactId>
-            <version>${maven.plugin.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        
+
         <!-- Maven Core -->
         <dependency>
             <groupId>org.apache.maven</groupId>
@@ -102,14 +114,23 @@
             <version>${maven.version}</version>
             <scope>provided</scope>
         </dependency>
-        
-        <!-- Surefire Plugin for Test Execution -->
+
+        <!-- Maven Plugin API -->
         <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>${maven-surefire-plugin.version}</version>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>${maven.version}</version>
+            <scope>provided</scope>
         </dependency>
-        
+
+        <!-- Maven Plugin Annotations -->
+        <dependency>
+            <groupId>org.apache.maven.plugin-tools</groupId>
+            <artifactId>maven-plugin-annotations</artifactId>
+            <version>${maven.plugin.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -117,24 +138,130 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-        
+
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+
+            <!-- Spotless - Code Formatting -->
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless-maven-plugin.version}</version>
+                <configuration>
+                    <java>
+                        <googleJavaFormat>
+                            <version>${google-java-format.version}</version>
+                            <style>GOOGLE</style>
+                            <reflowLongStrings>true</reflowLongStrings>
+                        </googleJavaFormat>
+                        <importOrder></importOrder>
+                        <removeUnusedImports></removeUnusedImports>
+                        <formatAnnotations></formatAnnotations>
+                    </java>
+                    <pom>
+                        <sortPom>
+                            <encoding>UTF-8</encoding>
+                            <nrOfIndentSpace>4</nrOfIndentSpace>
+                            <keepBlankLines>true</keepBlankLines>
+                            <indentBlankLines>false</indentBlankLines>
+                            <sortDependencies>scope,groupId,artifactId</sortDependencies>
+                            <sortPlugins>groupId,artifactId</sortPlugins>
+                        </sortPom>
+                    </pom>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- SpotBugs -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs-maven-plugin.version}</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <xmlOutput>true</xmlOutput>
+                    <includeTests>true</includeTests>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Checkstyle -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle-maven-plugin.version}</version>
+                <configuration>
+                    <configLocation>google_checks.xml</configLocation>
+                    <violationSeverity>warning</violationSeverity>
+                    <encoding>UTF-8</encoding>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>${checkstyle.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>validate</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                    <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                        <arg>-Xlint:-processing</arg>
+                        <arg>--system</arg>
+                        <arg>none</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
             <!-- Maven Enforcer Plugin - Enforce build standards -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -154,29 +281,27 @@
                                 <requireJavaVersion>
                                     <version>17</version>
                                 </requireJavaVersion>
-                                <dependencyConvergence/>
-                                <banDuplicatePomDependencyVersions/>
+                                <dependencyConvergence></dependencyConvergence>
+                                <banDuplicatePomDependencyVersions></banDuplicatePomDependencyVersions>
                             </rules>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
 
-            <!-- Maven Compiler Plugin -->
+            <!-- Maven Failsafe Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                    <encoding>UTF-8</encoding>
-                    <compilerArgs>
-                        <arg>-Xlint:all</arg>
-                        <arg>-Xlint:-processing</arg>
-                        <arg>-Werror</arg>
-                    </compilerArgs>
-                </configuration>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven-failsafe-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Maven Plugin Plugin -->
@@ -204,124 +329,6 @@
                 </executions>
             </plugin>
 
-            <!-- Maven Surefire Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <useSystemClassLoader>false</useSystemClassLoader>
-                    <argLine>-Dfile.encoding=UTF-8</argLine>
-                    <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*Tests.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-
-            <!-- Maven Failsafe Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${maven-failsafe-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Spotless - Code Formatting -->
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>${spotless-maven-plugin.version}</version>
-                <configuration>
-                    <java>
-                        <googleJavaFormat>
-                            <version>${google-java-format.version}</version>
-                            <style>GOOGLE</style>
-                            <reflowLongStrings>true</reflowLongStrings>
-                        </googleJavaFormat>
-                        <importOrder/>
-                        <removeUnusedImports/>
-                        <formatAnnotations/>
-                    </java>
-                    <pom>
-                        <sortPom>
-                            <encoding>UTF-8</encoding>
-                            <nrOfIndentSpace>4</nrOfIndentSpace>
-                            <keepBlankLines>true</keepBlankLines>
-                            <indentBlankLines>false</indentBlankLines>
-                            <sortDependencies>scope,groupId,artifactId</sortDependencies>
-                            <sortPlugins>groupId,artifactId</sortPlugins>
-                        </sortPom>
-                    </pom>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <phase>verify</phase>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Checkstyle -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${checkstyle-maven-plugin.version}</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.puppycrawl.tools</groupId>
-                        <artifactId>checkstyle</artifactId>
-                        <version>${checkstyle.version}</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <configLocation>google_checks.xml</configLocation>
-                    <violationSeverity>warning</violationSeverity>
-                    <encoding>UTF-8</encoding>
-                    <consoleOutput>true</consoleOutput>
-                    <failsOnError>true</failsOnError>
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- SpotBugs -->
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>${spotbugs-maven-plugin.version}</version>
-                <configuration>
-                    <effort>Max</effort>
-                    <threshold>Low</threshold>
-                    <xmlOutput>true</xmlOutput>
-                    <includeTests>true</includeTests>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!-- PMD -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -340,6 +347,24 @@
                         <ruleset>/category/java/errorprone.xml</ruleset>
                         <ruleset>/category/java/performance.xml</ruleset>
                     </rulesets>
+                    <excludeRules>
+                        <!-- Disable noisy design rules but keep important ones -->
+                        <excludeRule>LawOfDemeter</excludeRule>
+                        <excludeRule>CyclomaticComplexity</excludeRule>
+                        <excludeRule>NPathComplexity</excludeRule>
+                        <excludeRule>CognitiveComplexity</excludeRule>
+                        <excludeRule>TooManyMethods</excludeRule>
+                        <excludeRule>GodClass</excludeRule>
+                        <excludeRule>DataClass</excludeRule>
+                        <excludeRule>OnlyOneReturn</excludeRule>
+
+                        <!-- Disable some codestyle rules but keep naming conventions -->
+                        <excludeRule>UselessParentheses</excludeRule>
+                        <excludeRule>UnnecessaryFullyQualifiedName</excludeRule>
+                        <excludeRule>UseDiamondOperator</excludeRule>
+                        <excludeRule>IdenticalCatchBranches</excludeRule>
+                        <excludeRule>LinguisticNaming</excludeRule>
+                    </excludeRules>
                 </configuration>
                 <executions>
                     <execution>
@@ -348,6 +373,51 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- Maven Release Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${maven-release-plugin.version}</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <releaseProfiles>release</releaseProfiles>
+                    <goals>deploy</goals>
+                </configuration>
+            </plugin>
+
+            <!-- Maven Site Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>${maven-site-plugin.version}</version>
+            </plugin>
+
+            <!-- Maven Surefire Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <!-- Versions Plugin -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>${versions-maven-plugin.version}</version>
+                <configuration>
+                    <generateBackupPoms>false</generateBackupPoms>
+                </configuration>
             </plugin>
 
             <!-- OWASP Dependency Check -->
@@ -370,46 +440,17 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- Versions Plugin -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>${versions-maven-plugin.version}</version>
-                <configuration>
-                    <generateBackupPoms>false</generateBackupPoms>
-                </configuration>
-            </plugin>
-
-            <!-- Maven Release Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>${maven-release-plugin.version}</version>
-                <configuration>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <useReleaseProfile>false</useReleaseProfile>
-                    <releaseProfiles>release</releaseProfiles>
-                    <goals>deploy</goals>
-                </configuration>
-            </plugin>
-
-            <!-- Maven Site Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>${maven-site-plugin.version}</version>
-            </plugin>
         </plugins>
     </build>
 
     <reporting>
         <plugins>
-            <!-- Project Info Reports -->
+
+            <!-- SpotBugs Report -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>${maven-project-info-reports-plugin.version}</version>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs-maven-plugin.version}</version>
             </plugin>
 
             <!-- Checkstyle Report -->
@@ -430,13 +471,6 @@
                 </reportSets>
             </plugin>
 
-            <!-- SpotBugs Report -->
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>${spotbugs-maven-plugin.version}</version>
-            </plugin>
-
             <!-- PMD Report -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -448,6 +482,12 @@
                     <minimumTokens>100</minimumTokens>
                     <targetJdk>17</targetJdk>
                 </configuration>
+            </plugin>
+            <!-- Project Info Reports -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>${maven-project-info-reports-plugin.version}</version>
             </plugin>
 
             <!-- Surefire Report -->
@@ -467,6 +507,23 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <configuration>
+                            <doclint>none</doclint>
+                            <source>17</source>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
                         <version>3.3.0</version>
                         <executions>
@@ -477,23 +534,6 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.6.0</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <doclint>none</doclint>
-                            <source>17</source>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

@@ -3,9 +3,7 @@ package io.github.clojang.sophodromos;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Holds the results of test execution.
- */
+/** Holds the results of test execution. */
 public class TestExecutionResult {
 
   private final List<String> outputLines = new ArrayList<>();
@@ -66,7 +64,7 @@ public class TestExecutionResult {
           }
         }
         passedTests = totalTests - failedTests - errorTests - skippedTests;
-      } catch (Exception e) {
+      } catch (NumberFormatException e) {
         // Ignore parsing errors
       }
     }
@@ -87,15 +85,15 @@ public class TestExecutionResult {
 
   // Getters
   public List<String> getOutputLines() {
-    return outputLines;
+    return new ArrayList<>(outputLines);
   }
 
   public List<String> getErrorLines() {
-    return errorLines;
+    return new ArrayList<>(errorLines);
   }
 
   public List<String> getFailures() {
-    return failures;
+    return new ArrayList<>(failures);
   }
 
   public int getTotalTests() {
