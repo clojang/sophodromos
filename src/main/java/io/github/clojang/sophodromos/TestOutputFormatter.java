@@ -177,6 +177,7 @@ public class TestOutputFormatter {
   }
 
   // Getters to access GradlDromus configuration
+  @SuppressWarnings("EI_EXPOSE_REP")
   public GradlDromusExtension getExtension() {
     return extension;
   }
@@ -185,6 +186,7 @@ public class TestOutputFormatter {
     return colors;
   }
 
+  @SuppressWarnings("EI_EXPOSE_REP")
   public CleanTerminalPrinter getPrinter() {
     return printer;
   }

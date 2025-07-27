@@ -4,6 +4,7 @@ import io.github.clojang.gradldromus.AnsiColors;
 import io.github.clojang.gradldromus.CleanTerminalPrinter;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 /** Handles header and footer formatting for test output. */
 class HeaderFooterFormatter {
@@ -31,14 +32,14 @@ class HeaderFooterFormatter {
    */
   protected String formatHeader(final String title) {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final PrintStream printStream = new PrintStream(baos);
+    final PrintStream printStream = new PrintStream(baos, true, StandardCharsets.UTF_8);
 
     printer.println(printStream, "");
     printer.printHeading(printStream, colors, "=", AnsiColors.BRIGHT_GREEN);
     printer.println(printStream, colors.colorize("Running tests with " + title, AnsiColors.GREEN));
     printer.printHeading(printStream, colors, "-", AnsiColors.BRIGHT_GREEN);
 
-    return baos.toString();
+    return baos.toString(StandardCharsets.UTF_8);
   }
 
   /**
@@ -49,11 +50,11 @@ class HeaderFooterFormatter {
    */
   protected String formatFooter() {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final PrintStream printStream = new PrintStream(baos);
+    final PrintStream printStream = new PrintStream(baos, true, StandardCharsets.UTF_8);
 
     printer.println(printStream, "");
     printer.printHeading(printStream, colors, "=", AnsiColors.BRIGHT_GREEN);
 
-    return baos.toString();
+    return baos.toString(StandardCharsets.UTF_8);
   }
 }

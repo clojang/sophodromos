@@ -15,8 +15,8 @@ import org.apache.maven.project.MavenProject;
 
 /** SophoDromos Test Mojo - Provides GradlDromus-style test formatting for Maven. */
 @Mojo(
-    name = "run-tests",
-    defaultPhase = LifecyclePhase.TEST,
+    name = "test",
+    defaultPhase = LifecyclePhase.NONE,
     requiresDependencyResolution = ResolutionScope.TEST,
     threadSafe = true)
 @SuppressWarnings({

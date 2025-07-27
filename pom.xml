@@ -59,7 +59,7 @@
         <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
 
         <!-- Quality rules versions -->
-        <checkstyle.version>10.12.4</checkstyle.version>
+        <checkstyle.version>10.26.1</checkstyle.version>
         <google-java-format.version>1.17.0</google-java-format.version>
 
         <!-- Test dependencies versions -->
@@ -89,7 +89,7 @@
         <dependency>
             <groupId>io.github.clojang</groupId>
             <artifactId>gradldromus</artifactId>
-            <version>0.3.27</version>
+            <version>0.3.28</version>
         </dependency>
 
         <!-- Surefire Plugin for Test Execution -->
@@ -204,6 +204,7 @@
                     <threshold>Low</threshold>
                     <xmlOutput>true</xmlOutput>
                     <includeTests>true</includeTests>
+                    <excludeFilterFile>config/spotbugs-excludes.xml</excludeFilterFile>
                 </configuration>
                 <executions>
                     <execution>
@@ -257,8 +258,6 @@
                     <compilerArgs>
                         <arg>-Xlint:all</arg>
                         <arg>-Xlint:-processing</arg>
-                        <arg>--system</arg>
-                        <arg>none</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -310,7 +309,7 @@
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>${maven.plugin.version}</version>
                 <configuration>
-                    <goalPrefix>sophodromos</goalPrefix>
+                    <goalPrefix>sd</goalPrefix>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
                 </configuration>
                 <executions>

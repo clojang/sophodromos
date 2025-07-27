@@ -148,6 +148,11 @@ public class TestExecutionResult {
     return exitCode;
   }
 
+  /**
+   * Checks if the test execution has any failures or errors.
+   *
+   * @return true if there are failed tests, error tests, or non-zero exit code
+   */
   public boolean hasFailures() {
     return failedTests > 0 || errorTests > 0 || exitCode != 0;
   }
