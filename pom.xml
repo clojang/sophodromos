@@ -438,7 +438,7 @@
                     <failBuildOnCVSS>7</failBuildOnCVSS>
                     <format>ALL</format>
                     <suppressionFiles>
-                        <suppressionFile>owasp-suppressions.xml</suppressionFile>
+                        <suppressionFile>config/owasp-suppressions.xml</suppressionFile>
                     </suppressionFiles>
                 </configuration>
                 <executions>
