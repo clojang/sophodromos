@@ -38,7 +38,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Maven versions -->
-        <maven.version>3.8.1</maven.version>
+        <maven.version>3.9.11</maven.version>
         <maven.plugin.version>3.6.4</maven.plugin.version>
 
         <!-- Plugin versions -->
