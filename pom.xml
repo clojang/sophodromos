@@ -49,7 +49,7 @@
         <maven-project-info-reports-plugin.version>3.4.2</maven-project-info-reports-plugin.version>
 
         <!-- Quality tools versions -->
-        <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
+        <spotless-maven-plugin.version>2.46.1</spotless-maven-plugin.version>
         <checkstyle-maven-plugin.version>3.3.0</checkstyle-maven-plugin.version>
         <spotbugs-maven-plugin.version>4.7.3.6</spotbugs-maven-plugin.version>
         <pmd-maven-plugin.version>3.21.0</pmd-maven-plugin.version>
