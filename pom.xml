@@ -46,7 +46,7 @@
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.0.0-M9</maven-failsafe-plugin.version>
         <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
-        <maven-project-info-reports-plugin.version>3.4.2</maven-project-info-reports-plugin.version>
+        <maven-project-info-reports-plugin.version>3.9.0</maven-project-info-reports-plugin.version>
 
         <!-- Quality tools versions -->
         <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
