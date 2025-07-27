@@ -17,8 +17,7 @@ class HeaderFooterFormatter {
    * @param printer the terminal printer
    * @param colors the color formatter
    */
-  /* package-private */ HeaderFooterFormatter(
-      final CleanTerminalPrinter printer, final AnsiColors colors) {
+  protected HeaderFooterFormatter(final CleanTerminalPrinter printer, final AnsiColors colors) {
     this.printer = printer;
     this.colors = colors;
   }
@@ -30,7 +29,7 @@ class HeaderFooterFormatter {
    * @param title the header title
    * @return the formatted header string
    */
-  /* package-private */ String formatHeader(final String title) {
+  protected String formatHeader(final String title) {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final PrintStream printStream = new PrintStream(baos);
 
@@ -48,7 +47,7 @@ class HeaderFooterFormatter {
    *
    * @return the formatted footer string
    */
-  /* package-private */ String formatFooter() {
+  protected String formatFooter() {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final PrintStream printStream = new PrintStream(baos);
 

@@ -43,13 +43,8 @@ public class SophoDromosTestMojo extends AbstractMojo {
   private TestProcessManager processManager;
   private TestOutputCapture outputCapture;
 
-  /**
-   * Default constructor - dependencies are injected via Maven annotations. Explicit constructor
-   * added to satisfy PMD AtLeastOneConstructor rule.
-   */
   public SophoDromosTestMojo() {
-    super();
-    // Dependencies injected via Maven annotations
+    // Maven will inject dependencies
   }
 
   @Override

@@ -22,12 +22,8 @@ public class TestExecutionResult {
   private long executionTime;
   private int exitCode;
 
-  /**
-   * Default constructor - all fields initialized to default values. Explicit constructor added to
-   * satisfy PMD AtLeastOneConstructor rule.
-   */
   public TestExecutionResult() {
-    // Using default initialization for all fields
+    // Default initialization
   }
 
   /**

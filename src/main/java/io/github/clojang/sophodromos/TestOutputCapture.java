@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.maven.plugin.logging.Log;
 
 /** Captures and processes test output from input and error streams. */
+@SuppressWarnings("PMD.TestClassWithoutTestCases") // This is not a test class
 class TestOutputCapture {
   private final TestExecutionInterceptor interceptor;
   private final boolean showProgress;
@@ -20,7 +21,7 @@ class TestOutputCapture {
    * @param showProgress whether to show progress during execution
    * @param log the Maven logger
    */
-  TestOutputCapture(
+  protected TestOutputCapture(
       final TestExecutionInterceptor interceptor, final boolean showProgress, final Log log) {
     this.interceptor = interceptor;
     this.showProgress = showProgress;

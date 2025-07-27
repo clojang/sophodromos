@@ -13,7 +13,7 @@ class ProgressFormatter {
    *
    * @param colors the color formatter
    */
-  /* package-private */ ProgressFormatter(final AnsiColors colors) {
+  protected ProgressFormatter(final AnsiColors colors) {
     this.colors = colors;
   }
 
@@ -24,7 +24,7 @@ class ProgressFormatter {
    * @param line the line to format
    * @return the formatted line with appropriate colors
    */
-  /* package-private */ String formatLineByContent(final String line) {
+  protected String formatLineByContent(final String line) {
     if (isSuccessLine(line)) {
       return colors.colorize(INDENT + line, AnsiColors.BRIGHT_GREEN);
     }

@@ -11,18 +11,14 @@ class OutputPatternMatcher {
       Pattern.compile(
           "^Tests run: (\\d+), Failures: (\\d+), Errors: (\\d+), "
               + "Skipped: (\\d+), Time elapsed: ([\\d.]+) sec");
-  private static final Pattern INDIVID_TEST_FAIL_PTN =
+  private static final Pattern TEST_FAIL_PTN =
       Pattern.compile(
           "^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+sec" + "\\s+<<<\\s+(FAILURE|ERROR)!");
   private static final Pattern SUCCESS_PATTERN =
       Pattern.compile("^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+sec$");
 
-  /**
-   * Default constructor for OutputPatternMatcher. Package-private constructor for internal use
-   * within the sophodromos package.
-   */
-  /* package-private */ OutputPatternMatcher() {
-    // Default constructor to satisfy PMD AtLeastOneConstructor rule
+  private OutputPatternMatcher() {
+    // Utility class constructor
   }
 
   /**
@@ -33,7 +29,7 @@ class OutputPatternMatcher {
    * @param formatter the output formatter
    * @return formatted result or null if no match
    */
-  /* package-private */ String tryMatchTestClassExecution(
+  protected String tryMatchTestClassExecution(
       final String line, final TestOutputFormatter formatter) {
     final Matcher runningMatcher = RUNNING_PATTERN.matcher(line);
     if (runningMatcher.matches()) {
@@ -51,9 +47,8 @@ class OutputPatternMatcher {
    * @param formatter the output formatter
    * @return formatted result or null if no match
    */
-  /* package-private */ String tryMatchIndividualTest(
-      final String line, final TestOutputFormatter formatter) {
-    final Matcher testMatcher = INDIVID_TEST_FAIL_PTN.matcher(line);
+  protected String tryMatchIndividualTest(final String line, final TestOutputFormatter formatter) {
+    final Matcher testMatcher = TEST_FAIL_PTN.matcher(line);
     if (testMatcher.matches()) {
       final String methodName = testMatcher.group(1);
       final String className = testMatcher.group(2);
@@ -72,8 +67,7 @@ class OutputPatternMatcher {
    * @param formatter the output formatter
    * @return formatted result or null if no match
    */
-  /* package-private */ String tryMatchTestSuccess(
-      final String line, final TestOutputFormatter formatter) {
+  protected String tryMatchTestSuccess(final String line, final TestOutputFormatter formatter) {
     final Matcher successMatcher = SUCCESS_PATTERN.matcher(line);
     if (successMatcher.matches()) {
       final String methodName = successMatcher.group(1);
@@ -93,8 +87,7 @@ class OutputPatternMatcher {
    * @param formatter the output formatter
    * @return formatted result or null if no match
    */
-  /* package-private */ String tryMatchTestResults(
-      final String line, final TestOutputFormatter formatter) {
+  protected String tryMatchTestResults(final String line, final TestOutputFormatter formatter) {
     final Matcher resultMatcher = RESULT_PATTERN.matcher(line);
     if (resultMatcher.matches()) {
       return formatTestResults(

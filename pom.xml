@@ -340,6 +340,12 @@
                     <minimumTokens>100</minimumTokens>
                     <targetJdk>17</targetJdk>
                     <includeTests>true</includeTests>
+                    <compileSourceRoots>
+                        <compileSourceRoot>${project.basedir}/src/main/java</compileSourceRoot>
+                    </compileSourceRoots>
+                    <testSourceRoots>
+                        <testSourceRoot>${project.basedir}/src/test/java</testSourceRoot>
+                    </testSourceRoots>
                     <rulesets>
                         <ruleset>/category/java/bestpractices.xml</ruleset>
                         <ruleset>/category/java/codestyle.xml</ruleset>

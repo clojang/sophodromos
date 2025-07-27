@@ -15,8 +15,7 @@ class OutputLineProcessor {
    * @param project the Maven project
    * @param formatter the output formatter
    */
-  /* package-private */ OutputLineProcessor(
-      final MavenProject project, final TestOutputFormatter formatter) {
+  protected OutputLineProcessor(final MavenProject project, final TestOutputFormatter formatter) {
     this.project = project;
     this.formatter = formatter;
   }
@@ -28,20 +27,18 @@ class OutputLineProcessor {
    * @param line the line to process
    * @return the processed line or null if it should be skipped
    */
-  /* package-private */ String preprocessOutputLine(final String line) {
+  protected String preprocessOutputLine(final String line) {
+    String result = line;
+
     if (shouldSkipLine(line)) {
-      return null;
+      result = null;
+    } else if (isAssertionFailure(line)) {
+      result = formatter.formatErrorLine(line.trim());
+    } else if (isStackTrace(line)) {
+      result = handleStackTrace(line).orElse(null);
     }
 
-    if (isAssertionFailure(line)) {
-      return formatter.formatErrorLine(line.trim());
-    }
-
-    if (isStackTrace(line)) {
-      return handleStackTrace(line).orElse(null);
-    }
-
-    return line;
+    return result;
   }
 
   private boolean shouldSkipLine(final String line) {
@@ -61,16 +58,20 @@ class OutputLineProcessor {
   }
 
   private Optional<String> handleStackTrace(final String line) {
+    Optional<String> result;
+
     if (!isStackTrace(line)) {
-      return Optional.of(line);
+      result = Optional.of(line);
+    } else {
+      final String groupId = project.getGroupId();
+      if (line.contains(groupId) || line.contains("Test")) {
+        result = Optional.of(formatter.formatErrorLine("  " + line.trim()));
+      } else {
+        // Skip external stack traces
+        result = Optional.empty();
+      }
     }
 
-    final String groupId = project.getGroupId();
-    if (line.contains(groupId) || line.contains("Test")) {
-      return Optional.of(formatter.formatErrorLine("  " + line.trim()));
-    }
-
-    // Skip external stack traces
-    return Optional.empty();
+    return result;
   }
 }
