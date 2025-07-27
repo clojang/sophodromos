@@ -4,7 +4,7 @@
 
     <groupId>io.github.clojang</groupId>
     <artifactId>sophodromos</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <packaging>maven-plugin</packaging>
 
     <name>SophoDromos</name>
@@ -99,6 +99,14 @@
             <version>${maven-surefire-plugin.version}</version>
         </dependency>
 
+        <!-- SpotBugs Annotations -->
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <version>4.7.3</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Maven Artifact (required by maven-core) -->
         <dependency>
             <groupId>org.apache.maven</groupId>
@@ -155,6 +163,22 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/pom.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/pom.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
 
             <!-- Spotless - Code Formatting -->
@@ -261,6 +285,18 @@
                     </compilerArgs>
                 </configuration>
             </plugin>
+
+            <!-- Maven Resources Plugin - Enable filtering for pom.properties -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <propertiesEncoding>UTF-8</propertiesEncoding>
+                </configuration>
+            </plugin>
+
             <!-- Maven Enforcer Plugin - Enforce build standards -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -302,6 +338,30 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Maven JAR Plugin - Configure manifest with project metadata -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Title>${project.name}</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                            <Implementation-URL>${project.url}</Implementation-URL>
+                            <Specification-Title>${project.name}</Specification-Title>
+                            <Specification-Version>${project.version}</Specification-Version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
 
             <!-- Maven Plugin Plugin -->
             <plugin>
@@ -352,6 +412,8 @@
                         <ruleset>/category/java/errorprone.xml</ruleset>
                         <ruleset>/category/java/performance.xml</ruleset>
                     </rulesets>
+                    <!-- Claude, this is NOT COOL! you take too many liberties with the code -->
+                    <!-- TODO: Revisit these exclusions -->
                     <excludeRules>
                         <!-- Disable noisy design rules but keep important ones -->
                         <excludeRule>LawOfDemeter</excludeRule>

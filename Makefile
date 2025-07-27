@@ -106,6 +106,11 @@ install: ## Install to local repository (~/.m2)
 	$(MVN) clean install
 	@echo "$(GREEN)✅ Installed to ~/.m2/repository$(RESET)"
 
+force-install: ## Force-install to local repository (~/.m2)
+	@echo "$(RED)Installing to local repository...$(RESET)"
+	$(MVN) clean install  -DskipTests -Dskip-quality -Dpmd.skip=true -Dspotless.check.skip=true -q
+	@echo "$(GREEN)‼️ Force-installed to ~/.m2/repository$(RESET)"
+
 publish-local: install ## Alias for install (publish to ~/.m2)
 
 package: ## Create JAR package

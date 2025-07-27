@@ -86,12 +86,13 @@ class TestOutputCapture {
     }
   }
 
+  @SuppressWarnings("PMD.SystemPrintln") // Intentional console output for clean formatting
   private void processFormattedLine(
       final String formattedLine, final TestExecutionResult result, final boolean isError) {
     if (formattedLine != null) {
       if (isError) {
         result.addErrorLine(formattedLine);
-        log.error(formattedLine);
+        System.err.println(formattedLine);
       } else {
         result.addOutputLine(formattedLine);
         logProgressIfEnabled(formattedLine);
@@ -99,9 +100,10 @@ class TestOutputCapture {
     }
   }
 
+  @SuppressWarnings("PMD.SystemPrintln") // Intentional console output for clean formatting
   private void logProgressIfEnabled(final String formattedLine) {
-    if (showProgress && log.isInfoEnabled()) {
-      log.info(formattedLine);
+    if (showProgress) {
+      System.out.println(formattedLine);
     }
   }
 }

@@ -109,12 +109,38 @@ public class SophoDromosTestMojo extends AbstractMojo {
     outputCapture = new TestOutputCapture(interceptor, showProgress, getLog());
   }
 
+  @SuppressWarnings("PMD.SystemPrintln") // Intentional console output for clean formatting
   private void displayHeader() {
-    final Log log = getLog();
-    if (log.isInfoEnabled()) {
-      final String headerMessage =
-          formatter.formatHeader("SophoDromos Test Runner (powered by GradlDromus)");
-      log.info(headerMessage);
+    final String version = getSophoDromosVersion();
+    final String headerMessage =
+        formatter.formatHeader("SophoDromos Test Runner (version: " + version + ")");
+    System.out.println(headerMessage);
+  }
+
+  @SuppressWarnings("PMD.AvoidCatchingGenericException")
+  private String getSophoDromosVersion() {
+    try {
+      // First try to read version from Maven properties file (works during development)
+      try (java.io.InputStream stream =
+          this.getClass()
+              .getResourceAsStream(
+                  "/META-INF/maven/io.github.clojang/sophodromos/pom.properties")) {
+        if (stream != null) {
+          final java.util.Properties props = new java.util.Properties();
+          props.load(stream);
+          final String version = props.getProperty("version");
+          if (version != null) {
+            return version;
+          }
+        }
+      }
+
+      // Fallback to package implementation version (works from JAR)
+      final Package pkg = this.getClass().getPackage();
+      final String version = pkg.getImplementationVersion();
+      return version != null ? version : "unknown";
+    } catch (final Exception e) {
+      return "unknown";
     }
   }
 
@@ -170,36 +196,34 @@ public class SophoDromosTestMojo extends AbstractMojo {
     }
   }
 
+  @SuppressWarnings("PMD.SystemPrintln") // Intentional console output for clean formatting
   private void displayFormattedResults(final TestExecutionResult result) {
-    final Log log = getLog();
-    if (log.isInfoEnabled()) {
-      final String summaryHeader = formatter.formatSummaryHeader();
-      log.info(summaryHeader);
+    final String summaryHeader = formatter.formatSummaryHeader();
+    System.out.println(summaryHeader);
 
-      final String summary =
-          formatter.formatTestSummary(
-              result.getTotalTests(),
-              result.getPassedTests(),
-              result.getFailedTests(),
-              result.getErrorTests(),
-              result.getSkippedTests(),
-              result.getExecutionTime());
+    final String summary =
+        formatter.formatTestSummary(
+            result.getTotalTests(),
+            result.getPassedTests(),
+            result.getFailedTests(),
+            result.getErrorTests(),
+            result.getSkippedTests(),
+            result.getExecutionTime());
 
-      log.info(summary);
+    System.out.println(summary);
 
-      if (result.hasFailures() && detailedFailures) {
-        final String failureHeader = formatter.formatFailureHeader();
-        log.info(failureHeader);
+    if (result.hasFailures() && detailedFailures) {
+      final String failureHeader = formatter.formatFailureHeader();
+      System.out.println(failureHeader);
 
-        for (final String failure : result.getFailures()) {
-          final String failureDetail = formatter.formatFailureDetail(failure);
-          log.info(failureDetail);
-        }
+      for (final String failure : result.getFailures()) {
+        final String failureDetail = formatter.formatFailureDetail(failure);
+        System.out.println(failureDetail);
       }
-
-      final String footer = formatter.formatFooter();
-      log.info(footer);
     }
+
+    final String footer = formatter.formatFooter();
+    System.out.println(footer);
   }
 
   // Helper classes to support the refactored code

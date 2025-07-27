@@ -30,7 +30,7 @@
             <plugin>
                 <groupId>io.github.clojang</groupId>
                 <artifactId>sophodromos</artifactId>
-                <version>0.1.6</version>
+                <version>0.1.2</version>
             </plugin>
         </plugins>
     </build>
