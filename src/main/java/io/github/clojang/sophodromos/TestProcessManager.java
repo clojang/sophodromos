@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.maven.project.MavenProject;
 
 /** Manages the creation and configuration of Maven Surefire test processes. */
+@SuppressWarnings("PMD.TestClassWithoutTestCases") // This is not a test class
 class TestProcessManager {
   private final MavenProject project;
 
@@ -14,7 +15,7 @@ class TestProcessManager {
    *
    * @param project the Maven project
    */
-  TestProcessManager(final MavenProject project) {
+  protected TestProcessManager(final MavenProject project) {
     this.project = project;
   }
 
@@ -24,7 +25,7 @@ class TestProcessManager {
    * @return the started process
    * @throws IOException if process creation fails
    */
-  Process createSurefireProcess() throws IOException {
+  protected Process createSurefireProcess() throws IOException {
     final ProcessBuilder processBuilder = createSurefireProcessBuilder();
     return processBuilder.start();
   }

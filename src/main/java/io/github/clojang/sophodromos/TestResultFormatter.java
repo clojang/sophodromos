@@ -5,6 +5,7 @@ import io.github.clojang.gradldromus.GradlDromusExtension;
 import java.util.Locale;
 
 /** Handles individual test result formatting. */
+@SuppressWarnings("PMD.TestClassWithoutTestCases") // This is not a test class
 class TestResultFormatter {
   private static final String INDENT = "    ";
   private static final int DOTS_BASE = 76;
@@ -18,7 +19,7 @@ class TestResultFormatter {
    * @param colors the color formatter
    * @param extension the GradlDromus extension
    */
-  TestResultFormatter(final AnsiColors colors, final GradlDromusExtension extension) {
+  protected TestResultFormatter(final AnsiColors colors, final GradlDromusExtension extension) {
     this.colors = colors;
     this.extension = extension;
   }
@@ -32,7 +33,7 @@ class TestResultFormatter {
    * @param duration the test duration in milliseconds
    * @return the formatted test result
    */
-  String formatTestResult(
+  protected String formatTestResult(
       final String className, final String methodName, final String status, final long duration) {
     final StringBuilder outputStr = new StringBuilder();
 
@@ -66,10 +67,12 @@ class TestResultFormatter {
     return outputStr.toString();
   }
 
+  @SuppressWarnings("PMD.LawOfDemeter") // Standard string operations
   private int calculateDotsNeeded(final String className, final String methodName) {
     int nameLength = INDENT.length(); // indent
     if (className != null) {
-      nameLength += className.substring(className.lastIndexOf('.') + 1).length() + 1;
+      final String simpleClassName = className.substring(className.lastIndexOf('.') + 1);
+      nameLength += simpleClassName.length() + 1;
     }
     nameLength += methodName.length() + 1;
     return Math.max(1, DOTS_BASE - nameLength);
@@ -100,9 +103,9 @@ class TestResultFormatter {
   }
 
   /** Container for status information including symbol and color. */
-  static class StatusInfo {
-    final String symbol;
-    final String color;
+  protected static class StatusInfo {
+    protected final String symbol;
+    protected final String color;
 
     /**
      * Constructs a new StatusInfo.
@@ -110,7 +113,7 @@ class TestResultFormatter {
      * @param symbol the status symbol
      * @param color the status color
      */
-    StatusInfo(final String symbol, final String color) {
+    protected StatusInfo(final String symbol, final String color) {
       this.symbol = symbol;
       this.color = color;
     }

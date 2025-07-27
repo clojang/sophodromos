@@ -53,7 +53,7 @@
         <checkstyle-maven-plugin.version>3.3.0</checkstyle-maven-plugin.version>
         <spotbugs-maven-plugin.version>4.7.3.6</spotbugs-maven-plugin.version>
         <pmd-maven-plugin.version>3.21.0</pmd-maven-plugin.version>
-        <dependency-check-maven.version>8.4.0</dependency-check-maven.version>
+        <dependency-check-maven.version>12.1.0</dependency-check-maven.version>
         <versions-maven-plugin.version>2.16.0</versions-maven-plugin.version>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
         <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
@@ -432,6 +432,9 @@
                 <artifactId>dependency-check-maven</artifactId>
                 <version>${dependency-check-maven.version}</version>
                 <configuration>
+                    <nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
+                    <nvdApiDelay>3000</nvdApiDelay>
+                    <!-- Optional: delay between API calls -->
                     <failBuildOnCVSS>7</failBuildOnCVSS>
                     <format>ALL</format>
                     <suppressionFiles>

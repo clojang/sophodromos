@@ -35,7 +35,7 @@ class TestOutputCapture {
    * @param result the test execution result to populate
    * @return the capture thread
    */
-  Thread createOutputCaptureThread(
+  protected Thread createOutputCaptureThread(
       final InputStream inputStream, final TestExecutionResult result) {
     return new Thread(() -> processOutputStream(inputStream, result));
   }
@@ -47,7 +47,8 @@ class TestOutputCapture {
    * @param result the test execution result to populate
    * @return the capture thread
    */
-  Thread createErrorCaptureThread(final InputStream errorStream, final TestExecutionResult result) {
+  protected Thread createErrorCaptureThread(
+      final InputStream errorStream, final TestExecutionResult result) {
     return new Thread(() -> processErrorStream(errorStream, result));
   }
 

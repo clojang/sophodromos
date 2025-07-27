@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Holds the results of test execution. */
-@SuppressWarnings({"PMD.DataClass", "PMD.TestClassWithoutTestCases"})
-// This is not a test class, it's a data holder
+@SuppressWarnings({"PMD.DataClass", "PMD.TestClassWithoutTestCases", "PMD.AtLeastOneConstructor"})
+// This is not a test class, it's a data holder - default constructor is sufficient
 public class TestExecutionResult {
 
   private static final int MIN_PARTS_LENGTH = 1;
@@ -21,10 +21,6 @@ public class TestExecutionResult {
   private int skippedTests;
   private long executionTime;
   private int exitCode;
-
-  public TestExecutionResult() {
-    // Default initialization
-  }
 
   /**
    * Adds an output line and analyzes it for test statistics.
@@ -60,6 +56,8 @@ public class TestExecutionResult {
     }
   }
 
+  @SuppressWarnings("PMD.EmptyCatchBlock")
+  // Intentionally empty - parsing errors should not break build
   private void parseTestResults(final String line) {
     try {
       final String[] parts = line.split(",");
@@ -72,6 +70,7 @@ public class TestExecutionResult {
       // Ignore parsing errors - malformed test output should not break the build
       // This is intentionally minimal logging to avoid cluttering output
       // Full logging could be added at debug level if needed for troubleshooting
+      // PMD: Intentionally empty - parsing errors should not break the build
     }
   }
 
@@ -87,6 +86,7 @@ public class TestExecutionResult {
     }
   }
 
+  @SuppressWarnings("PMD.DataflowAnomalyAnalysis") // False positive from OnlyOneReturn refactoring
   private int extractNumber(final String part) {
     int result = 0;
     final String[] splitPart = part.split(":");

@@ -27,6 +27,8 @@ class OutputLineProcessor {
    * @param line the line to process
    * @return the processed line or null if it should be skipped
    */
+  @SuppressWarnings({"PMD.DataflowAnomalyAnalysis", "PMD.NullAssignment", "PMD.LawOfDemeter"})
+  // False positives from OnlyOneReturn refactoring and standard method chains
   protected String preprocessOutputLine(final String line) {
     String result = line;
 
@@ -53,16 +55,16 @@ class OutputLineProcessor {
     return line.contains("AssertionError") || line.contains("Expected") || line.contains("Actual");
   }
 
+  @SuppressWarnings("PMD.LawOfDemeter") // Standard string operation
   private boolean isStackTrace(final String line) {
-    return line.trim().startsWith("at ");
+    final String trimmedLine = line.trim();
+    return trimmedLine.startsWith("at ");
   }
 
   private Optional<String> handleStackTrace(final String line) {
     Optional<String> result;
 
-    if (!isStackTrace(line)) {
-      result = Optional.of(line);
-    } else {
+    if (isStackTrace(line)) {
       final String groupId = project.getGroupId();
       if (line.contains(groupId) || line.contains("Test")) {
         result = Optional.of(formatter.formatErrorLine("  " + line.trim()));
@@ -70,6 +72,8 @@ class OutputLineProcessor {
         // Skip external stack traces
         result = Optional.empty();
       }
+    } else {
+      result = Optional.of(line);
     }
 
     return result;

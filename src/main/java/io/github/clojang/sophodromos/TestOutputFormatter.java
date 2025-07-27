@@ -12,13 +12,14 @@ import io.github.clojang.gradldromus.GradlDromusExtension;
 public class TestOutputFormatter {
 
   private static final int SUMMARY_LENGTH = 200;
+  private static final double MS_TO_SECONDS = 1000.0;
 
   private final GradlDromusExtension extension;
   private final AnsiColors colors;
   private final CleanTerminalPrinter printer;
-  private final HeaderFooterFormatter headerFooterFormatter;
+  private final HeaderFooterFormatter headerFormatter;
   private final ProgressFormatter progressFormatter;
-  private final TestResultFormatter testResultFormatter;
+  private final TestResultFormatter resultFormatter;
 
   /**
    * Constructs a new TestOutputFormatter.
@@ -36,9 +37,9 @@ public class TestOutputFormatter {
 
     this.colors = new AnsiColors(colorOutput);
     this.printer = new CleanTerminalPrinter(extension);
-    this.headerFooterFormatter = new HeaderFooterFormatter(printer, colors);
+    this.headerFormatter = new HeaderFooterFormatter(printer, colors);
     this.progressFormatter = new ProgressFormatter(colors);
-    this.testResultFormatter = new TestResultFormatter(colors, extension);
+    this.resultFormatter = new TestResultFormatter(colors, extension);
   }
 
   /**
@@ -48,7 +49,7 @@ public class TestOutputFormatter {
    * @return the formatted header string
    */
   public String formatHeader(final String title) {
-    return headerFooterFormatter.formatHeader(title);
+    return headerFormatter.formatHeader(title);
   }
 
   /**
@@ -57,6 +58,7 @@ public class TestOutputFormatter {
    * @param line the line to format
    * @return the formatted line
    */
+  @SuppressWarnings("PMD.DataflowAnomalyAnalysis") // False positive from OnlyOneReturn refactoring
   public String formatProgressLine(final String line) {
     String result = line;
     if (line != null && !line.isBlank()) {
@@ -117,12 +119,11 @@ public class TestOutputFormatter {
             colors.colorize(
                 extension.getSkipSymbol() + " " + skipped + " skipped", AnsiColors.CYAN))
         .append('\n')
-        .append(colors.colorize("Time: ", AnsiColors.WHITE))
-        .append(executionTimeMs / 1000.0)
-        .append('s');
+        .append(
+            colors.colorize("Time: " + (executionTimeMs / MS_TO_SECONDS) + "s", AnsiColors.WHITE));
 
     final String resultMessage =
-        (failed == 0 && errors == 0)
+        failed == 0 && errors == 0
             ? colors.colorize("✨ All tests passed!", AnsiColors.BRIGHT_GREEN)
             : colors.colorize("❌ Some tests failed.", AnsiColors.BRIGHT_RED);
 
@@ -158,7 +159,7 @@ public class TestOutputFormatter {
    * @return the formatted footer string
    */
   public String formatFooter() {
-    return headerFooterFormatter.formatFooter();
+    return headerFormatter.formatFooter();
   }
 
   /**
@@ -172,7 +173,7 @@ public class TestOutputFormatter {
    */
   public String formatTestResult(
       final String className, final String methodName, final String status, final long duration) {
-    return testResultFormatter.formatTestResult(className, methodName, status, duration);
+    return resultFormatter.formatTestResult(className, methodName, status, duration);
   }
 
   // Getters to access GradlDromus configuration

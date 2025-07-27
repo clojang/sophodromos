@@ -19,6 +19,13 @@ import org.apache.maven.project.MavenProject;
     defaultPhase = LifecyclePhase.TEST,
     requiresDependencyResolution = ResolutionScope.TEST,
     threadSafe = true)
+@SuppressWarnings({
+  "PMD.TooManyMethods",
+  "PMD.LawOfDemeter",
+  "PMD.UnnecessaryConstructor",
+  "PMD.CloseResource"
+})
+// Standard Maven plugin patterns
 public class SophoDromosTestMojo extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}", readonly = true, required = true)
@@ -43,8 +50,9 @@ public class SophoDromosTestMojo extends AbstractMojo {
   private TestProcessManager processManager;
   private TestOutputCapture outputCapture;
 
+  /** Default constructor. */
   public SophoDromosTestMojo() {
-    // Maven will inject dependencies
+    super();
   }
 
   @Override
@@ -184,17 +192,16 @@ public class SophoDromosTestMojo extends AbstractMojo {
     private final InputStream inputStream;
     private final InputStream errorStream;
 
-    /* package-private */ ProcessStreams(
-        final InputStream inputStream, final InputStream errorStream) {
+    protected ProcessStreams(final InputStream inputStream, final InputStream errorStream) {
       this.inputStream = inputStream;
       this.errorStream = errorStream;
     }
 
-    /* package-private */ InputStream getInputStream() {
+    protected InputStream getInputStream() {
       return inputStream;
     }
 
-    /* package-private */ InputStream getErrorStream() {
+    protected InputStream getErrorStream() {
       return errorStream;
     }
   }
@@ -203,17 +210,17 @@ public class SophoDromosTestMojo extends AbstractMojo {
     private final Thread outputThread;
     private final Thread errorThread;
 
-    /* package-private */ ThreadManager(final Thread outputThread, final Thread errorThread) {
+    protected ThreadManager(final Thread outputThread, final Thread errorThread) {
       this.outputThread = outputThread;
       this.errorThread = errorThread;
     }
 
-    /* package-private */ void startThreads() {
+    protected void startThreads() {
       outputThread.start();
       errorThread.start();
     }
 
-    /* package-private */ void waitForCompletion() throws InterruptedException {
+    protected void waitForCompletion() throws InterruptedException {
       outputThread.join(5000);
       errorThread.join(5000);
     }

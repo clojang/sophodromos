@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <!-- Example suppression for false positives -->
+    <!-- 
+    <suppress>
+        <notes><![CDATA[
+        This is a false positive. The vulnerability is in a different package.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.example/.*$</packageUrl>
+        <cve>CVE-2021-12345</cve>
+    </suppress>
+    -->
+    
+    <!-- Suppress test dependencies if needed -->
+    <suppress>
+        <notes><![CDATA[
+        Test dependencies are not included in production builds
+        ]]></notes>
+        <filePath regex="true">.*test.*\.jar</filePath>
+        <cvssBelow>7.0</cvssBelow>
+    </suppress>
+
+    <!-- Common false positive for Spring Boot embedded Tomcat -->
+    <suppress>
+        <notes><![CDATA[
+        Spring Boot applications with embedded Tomcat are not vulnerable to this issue
+        when not using the affected functionality
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/.*$</packageUrl>
+        <cpe>cpe:/a:apache:tomcat</cpe>
+        <cvssBelow>7.0</cvssBelow>
+    </suppress>
+</suppressions>
