@@ -11,23 +11,26 @@ class HeaderFooterFormatter {
   private final AnsiColors colors;
 
   /**
-   * Constructs a new HeaderFooterFormatter.
+   * Constructs a new HeaderFooterFormatter. Package-private constructor for internal use within the
+   * sophodromos package.
    *
    * @param printer the terminal printer
    * @param colors the color formatter
    */
-  HeaderFooterFormatter(final CleanTerminalPrinter printer, final AnsiColors colors) {
+  /* package-private */ HeaderFooterFormatter(
+      final CleanTerminalPrinter printer, final AnsiColors colors) {
     this.printer = printer;
     this.colors = colors;
   }
 
   /**
-   * Formats a header with the given title.
+   * Formats a header with the given title. Package-private method for internal use within the
+   * sophodromos package.
    *
    * @param title the header title
    * @return the formatted header string
    */
-  String formatHeader(final String title) {
+  /* package-private */ String formatHeader(final String title) {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final PrintStream printStream = new PrintStream(baos);
 
@@ -40,11 +43,12 @@ class HeaderFooterFormatter {
   }
 
   /**
-   * Formats a footer section.
+   * Formats a footer section. Package-private method for internal use within the sophodromos
+   * package.
    *
    * @return the formatted footer string
    */
-  String formatFooter() {
+  /* package-private */ String formatFooter() {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final PrintStream printStream = new PrintStream(baos);
 

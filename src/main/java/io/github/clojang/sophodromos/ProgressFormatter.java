@@ -8,34 +8,40 @@ class ProgressFormatter {
   private final AnsiColors colors;
 
   /**
-   * Constructs a new ProgressFormatter.
+   * Constructs a new ProgressFormatter. Package-private constructor for internal use within the
+   * sophodromos package.
    *
    * @param colors the color formatter
    */
-  ProgressFormatter(final AnsiColors colors) {
+  /* package-private */ ProgressFormatter(final AnsiColors colors) {
     this.colors = colors;
   }
 
   /**
-   * Formats a line based on its content type.
+   * Formats a line based on its content type. Package-private method for internal use within the
+   * sophodromos package.
    *
    * @param line the line to format
    * @return the formatted line with appropriate colors
    */
-  String formatLineByContent(final String line) {
-    String result = colors.colorize(INDENT + line, AnsiColors.WHITE);
-
+  /* package-private */ String formatLineByContent(final String line) {
     if (isSuccessLine(line)) {
-      result = colors.colorize(INDENT + line, AnsiColors.BRIGHT_GREEN);
-    } else if (isFailureLine(line)) {
-      result = colors.colorize(INDENT + line, AnsiColors.BRIGHT_RED);
-    } else if (isSkipLine(line)) {
-      result = colors.colorize(INDENT + line, AnsiColors.BRIGHT_CYAN);
-    } else if (isExecutionLine(line)) {
-      result = colors.colorize(line, AnsiColors.BOLD, AnsiColors.BRIGHT_YELLOW);
+      return colors.colorize(INDENT + line, AnsiColors.BRIGHT_GREEN);
     }
 
-    return result;
+    if (isFailureLine(line)) {
+      return colors.colorize(INDENT + line, AnsiColors.BRIGHT_RED);
+    }
+
+    if (isSkipLine(line)) {
+      return colors.colorize(INDENT + line, AnsiColors.BRIGHT_CYAN);
+    }
+
+    if (isExecutionLine(line)) {
+      return colors.colorize(line, AnsiColors.BOLD, AnsiColors.BRIGHT_YELLOW);
+    }
+
+    return colors.colorize(INDENT + line, AnsiColors.WHITE);
   }
 
   private boolean isSuccessLine(final String line) {

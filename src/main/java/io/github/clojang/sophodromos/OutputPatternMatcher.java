@@ -11,98 +11,111 @@ class OutputPatternMatcher {
       Pattern.compile(
           "^Tests run: (\\d+), Failures: (\\d+), Errors: (\\d+), "
               + "Skipped: (\\d+), Time elapsed: ([\\d.]+) sec");
-  private static final Pattern INDIVIDUAL_PATTERN =
+  private static final Pattern INDIVID_TEST_FAIL_PTN =
       Pattern.compile(
           "^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+sec" + "\\s+<<<\\s+(FAILURE|ERROR)!");
   private static final Pattern SUCCESS_PATTERN =
       Pattern.compile("^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+sec$");
 
   /**
-   * Tries to match a test class execution line.
-   *
-   * @param line the line to match
-   * @param formatter the output formatter
-   * @return formatted result or null if no match
+   * Default constructor for OutputPatternMatcher. Package-private constructor for internal use
+   * within the sophodromos package.
    */
-  String tryMatchTestClassExecution(final String line, final TestOutputFormatter formatter) {
-    // PMD suppression: Using static pattern matcher is acceptable
-    final Matcher runningMatcher = RUNNING_PATTERN.matcher(line);
-    String result = null;
-    if (runningMatcher.matches()) {
-      final String testClass = runningMatcher.group(1);
-      result = formatTestClassExecution(testClass, formatter);
-    }
-    return result;
+  /* package-private */ OutputPatternMatcher() {
+    // Default constructor to satisfy PMD AtLeastOneConstructor rule
   }
 
   /**
-   * Tries to match an individual test failure/error line.
+   * Tries to match a test class execution line. Package-private method for internal use within the
+   * sophodromos package.
    *
    * @param line the line to match
    * @param formatter the output formatter
    * @return formatted result or null if no match
    */
-  String tryMatchIndividualTest(final String line, final TestOutputFormatter formatter) {
-    final Matcher testMatcher = INDIVIDUAL_PATTERN.matcher(line);
-    String result = null;
+  /* package-private */ String tryMatchTestClassExecution(
+      final String line, final TestOutputFormatter formatter) {
+    final Matcher runningMatcher = RUNNING_PATTERN.matcher(line);
+    if (runningMatcher.matches()) {
+      final String testClass = runningMatcher.group(1);
+      return formatTestClassExecution(testClass, formatter);
+    }
+    return null;
+  }
+
+  /**
+   * Tries to match an individual test failure/error line. Package-private method for internal use
+   * within the sophodromos package.
+   *
+   * @param line the line to match
+   * @param formatter the output formatter
+   * @return formatted result or null if no match
+   */
+  /* package-private */ String tryMatchIndividualTest(
+      final String line, final TestOutputFormatter formatter) {
+    final Matcher testMatcher = INDIVID_TEST_FAIL_PTN.matcher(line);
     if (testMatcher.matches()) {
       final String methodName = testMatcher.group(1);
       final String className = testMatcher.group(2);
       final double timeElapsed = Double.parseDouble(testMatcher.group(3));
       final String status = testMatcher.group(4);
-      result =
-          formatter.formatTestResult(className, methodName, status, (long) (timeElapsed * 1000));
+      return formatter.formatTestResult(className, methodName, status, (long) (timeElapsed * 1000));
     }
-    return result;
+    return null;
   }
 
   /**
-   * Tries to match a successful test line.
+   * Tries to match a successful test line. Package-private method for internal use within the
+   * sophodromos package.
    *
    * @param line the line to match
    * @param formatter the output formatter
    * @return formatted result or null if no match
    */
-  String tryMatchTestSuccess(final String line, final TestOutputFormatter formatter) {
+  /* package-private */ String tryMatchTestSuccess(
+      final String line, final TestOutputFormatter formatter) {
     final Matcher successMatcher = SUCCESS_PATTERN.matcher(line);
-    String result = null;
     if (successMatcher.matches()) {
       final String methodName = successMatcher.group(1);
       final String className = successMatcher.group(2);
       final double timeElapsed = Double.parseDouble(successMatcher.group(3));
-      result =
-          formatter.formatTestResult(className, methodName, "SUCCESS", (long) (timeElapsed * 1000));
+      return formatter.formatTestResult(
+          className, methodName, "SUCCESS", (long) (timeElapsed * 1000));
     }
-    return result;
+    return null;
   }
 
   /**
-   * Tries to match a test results summary line.
+   * Tries to match a test results summary line. Package-private method for internal use within the
+   * sophodromos package.
    *
    * @param line the line to match
    * @param formatter the output formatter
    * @return formatted result or null if no match
    */
-  String tryMatchTestResults(final String line, final TestOutputFormatter formatter) {
+  /* package-private */ String tryMatchTestResults(
+      final String line, final TestOutputFormatter formatter) {
     final Matcher resultMatcher = RESULT_PATTERN.matcher(line);
-    String result = null;
     if (resultMatcher.matches()) {
-      result =
-          formatTestResults(
-              Integer.parseInt(resultMatcher.group(1)), // tests run
-              Integer.parseInt(resultMatcher.group(2)), // failures
-              Integer.parseInt(resultMatcher.group(3)), // errors
-              Integer.parseInt(resultMatcher.group(4)), // skipped
-              Double.parseDouble(resultMatcher.group(5)), // time
-              formatter);
+      return formatTestResults(
+          Integer.parseInt(resultMatcher.group(1)), // tests run
+          Integer.parseInt(resultMatcher.group(2)), // failures
+          Integer.parseInt(resultMatcher.group(3)), // errors
+          Integer.parseInt(resultMatcher.group(4)), // skipped
+          Double.parseDouble(resultMatcher.group(5)), // time
+          formatter);
     }
-    return result;
+    return null;
   }
 
   private String formatTestClassExecution(
       final String testClass, final TestOutputFormatter formatter) {
-    final String simpleName = testClass.substring(testClass.lastIndexOf('.') + 1);
+    final String simpleName = getSimpleClassName(testClass);
     return formatter.formatProgressLine("🧪 Executing " + simpleName + "...");
+  }
+
+  private String getSimpleClassName(final String testClass) {
+    return testClass.substring(testClass.lastIndexOf('.') + 1);
   }
 
   private String formatTestResults(

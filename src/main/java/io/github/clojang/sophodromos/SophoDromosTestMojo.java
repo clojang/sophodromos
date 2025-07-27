@@ -40,7 +40,6 @@ public class SophoDromosTestMojo extends AbstractMojo {
   private boolean detailedFailures;
 
   private TestOutputFormatter formatter;
-  private TestExecutionInterceptor interceptor;
   private TestProcessManager processManager;
   private TestOutputCapture outputCapture;
 
@@ -49,6 +48,7 @@ public class SophoDromosTestMojo extends AbstractMojo {
    * added to satisfy PMD AtLeastOneConstructor rule.
    */
   public SophoDromosTestMojo() {
+    super();
     // Dependencies injected via Maven annotations
   }
 
@@ -74,7 +74,8 @@ public class SophoDromosTestMojo extends AbstractMojo {
   }
 
   private void handleInterruption() {
-    Thread.currentThread().interrupt();
+    final Thread currentThread = Thread.currentThread();
+    currentThread.interrupt();
   }
 
   private void logSkippedTests() {
@@ -86,7 +87,7 @@ public class SophoDromosTestMojo extends AbstractMojo {
 
   private void initializeComponents() {
     formatter = new TestOutputFormatter(colorOutput, detailedFailures);
-    interceptor = new TestExecutionInterceptor(project, formatter);
+    final TestExecutionInterceptor interceptor = new TestExecutionInterceptor(project, formatter);
     processManager = new TestProcessManager(project);
     outputCapture = new TestOutputCapture(interceptor, showProgress, getLog());
   }
@@ -130,7 +131,9 @@ public class SophoDromosTestMojo extends AbstractMojo {
   }
 
   private ProcessStreams getProcessStreams(final Process process) {
-    return new ProcessStreams(process.getInputStream(), process.getErrorStream());
+    final InputStream inputStream = process.getInputStream();
+    final InputStream errorStream = process.getErrorStream();
+    return new ProcessStreams(inputStream, errorStream);
   }
 
   private ThreadManager createThreadManager(
@@ -186,16 +189,17 @@ public class SophoDromosTestMojo extends AbstractMojo {
     private final InputStream inputStream;
     private final InputStream errorStream;
 
-    ProcessStreams(final InputStream inputStream, final InputStream errorStream) {
+    /* package-private */ ProcessStreams(
+        final InputStream inputStream, final InputStream errorStream) {
       this.inputStream = inputStream;
       this.errorStream = errorStream;
     }
 
-    InputStream getInputStream() {
+    /* package-private */ InputStream getInputStream() {
       return inputStream;
     }
 
-    InputStream getErrorStream() {
+    /* package-private */ InputStream getErrorStream() {
       return errorStream;
     }
   }
@@ -204,17 +208,17 @@ public class SophoDromosTestMojo extends AbstractMojo {
     private final Thread outputThread;
     private final Thread errorThread;
 
-    ThreadManager(final Thread outputThread, final Thread errorThread) {
+    /* package-private */ ThreadManager(final Thread outputThread, final Thread errorThread) {
       this.outputThread = outputThread;
       this.errorThread = errorThread;
     }
 
-    void startThreads() {
+    /* package-private */ void startThreads() {
       outputThread.start();
       errorThread.start();
     }
 
-    void waitForCompletion() throws InterruptedException {
+    /* package-private */ void waitForCompletion() throws InterruptedException {
       outputThread.join(5000);
       errorThread.join(5000);
     }

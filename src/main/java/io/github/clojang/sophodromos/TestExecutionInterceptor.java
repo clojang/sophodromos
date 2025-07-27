@@ -6,7 +6,6 @@ import org.apache.maven.project.MavenProject;
 @SuppressWarnings("PMD.TestClassWithoutTestCases") // This is not a test class
 public class TestExecutionInterceptor {
 
-  private final MavenProject project;
   private final TestOutputFormatter formatter;
   private final OutputPatternMatcher patternMatcher;
   private final OutputLineProcessor lineProcessor;
@@ -18,7 +17,6 @@ public class TestExecutionInterceptor {
    * @param formatter the test output formatter
    */
   public TestExecutionInterceptor(final MavenProject project, final TestOutputFormatter formatter) {
-    this.project = project;
     this.formatter = formatter;
     this.patternMatcher = new OutputPatternMatcher();
     this.lineProcessor = new OutputLineProcessor(project, formatter);
@@ -31,25 +29,31 @@ public class TestExecutionInterceptor {
    * @return the formatted output line or null if the line should be skipped
    */
   public String interceptTestOutput(final String line) {
-    String result = line;
-
-    if (line != null && !line.isBlank()) {
-      result = patternMatcher.tryMatchTestClassExecution(line, formatter);
-      if (result == null) {
-        result = patternMatcher.tryMatchIndividualTest(line, formatter);
-      }
-      if (result == null) {
-        result = patternMatcher.tryMatchTestSuccess(line, formatter);
-      }
-      if (result == null) {
-        result = patternMatcher.tryMatchTestResults(line, formatter);
-      }
-      if (result == null) {
-        result = lineProcessor.preprocessOutputLine(line);
-      }
+    if (line == null || line.isBlank()) {
+      return line;
     }
 
-    return result;
+    String result = patternMatcher.tryMatchTestClassExecution(line, formatter);
+    if (result != null) {
+      return result;
+    }
+
+    result = patternMatcher.tryMatchIndividualTest(line, formatter);
+    if (result != null) {
+      return result;
+    }
+
+    result = patternMatcher.tryMatchTestSuccess(line, formatter);
+    if (result != null) {
+      return result;
+    }
+
+    result = patternMatcher.tryMatchTestResults(line, formatter);
+    if (result != null) {
+      return result;
+    }
+
+    return lineProcessor.preprocessOutputLine(line);
   }
 
   /**
@@ -59,10 +63,9 @@ public class TestExecutionInterceptor {
    * @return the formatted error line
    */
   public String interceptErrorOutput(final String line) {
-    String result = line;
-    if (line != null && !line.isBlank()) {
-      result = formatter.formatErrorLine(line);
+    if (line == null || line.isBlank()) {
+      return line;
     }
-    return result;
+    return formatter.formatErrorLine(line);
   }
 }
