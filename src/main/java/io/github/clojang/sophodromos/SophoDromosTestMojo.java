@@ -34,7 +34,7 @@ public class SophoDromosTestMojo extends AbstractMojo {
   @Parameter(defaultValue = "${session}", readonly = true, required = true)
   private MavenSession session;
 
-  @Parameter(property = "maven.test.skip", defaultValue = "false")
+  @Parameter(property = "sophodromos.skip", defaultValue = "false")
   private boolean skipTests;
 
   @Parameter(property = "sophodromos.colorOutput", defaultValue = "true")
@@ -62,6 +62,9 @@ public class SophoDromosTestMojo extends AbstractMojo {
       return;
     }
 
+    // Warn about potential duplicate test execution
+    warnAboutDuplicateExecution();
+
     try {
       initializeComponents();
       displayHeader();
@@ -79,6 +82,17 @@ public class SophoDromosTestMojo extends AbstractMojo {
   private void handleInterruption() {
     final Thread currentThread = Thread.currentThread();
     currentThread.interrupt();
+  }
+
+  private void warnAboutDuplicateExecution() {
+    final Log log = getLog();
+    if (log.isWarnEnabled()) {
+      log.warn("⚠️  If you ran 'mvn install sd:test' or similar, tests may run twice.");
+      log.warn("💡 To avoid duplicate test execution, use either:");
+      log.warn("   • mvn compile sd:test  (for SophoDromos only)");
+      log.warn("   • mvn install -Dmaven.test.skip=true sd:test  (skip default, run SophoDromos)");
+      log.warn("   • Use -Dsophodromos.skip=true to skip SophoDromos tests if needed");
+    }
   }
 
   private void logSkippedTests() {

@@ -25,6 +25,7 @@ replay_pid*
 
 # Build dirs
 /target
+test-project/target
 
 # AI dirs
 .claude

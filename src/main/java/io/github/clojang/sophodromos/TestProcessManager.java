@@ -33,7 +33,6 @@ class TestProcessManager {
   private ProcessBuilder createSurefireProcessBuilder() {
     final List<String> command = new ArrayList<>();
     command.add("mvn");
-    command.add("test-compile");
     command.add("surefire:test");
     command.add("-Dmaven.test.failure.ignore=true");
 
