@@ -1,7 +1,7 @@
 # Makefile for SophoDromos Maven Plugin
 # Provides convenient commands for development workflow
 
-.PHONY: help build clean test lint format publish-local check-types install deps
+.PHONY: help build clean test lint format publish-local check-types install deps version release just-publish publish
 
 # Default target
 .DEFAULT_GOAL := help
@@ -177,6 +177,25 @@ clean-all: clean ## Clean everything including IDE files
 	rm -rf .settings/
 	@echo "$(GREEN)✅ Everything cleaned$(RESET)"
 
+version: ## Show current project version
+	@$(MVN) help:evaluate -Dexpression=project.version -q -DforceStdout
+
+release: ## Create and tag release version
+	@echo "$(BLUE)Creating release...$(RESET)"
+	@version=$$($(MVN) help:evaluate -Dexpression=project.version -q -DforceStdout) && \
+	git tag -a "v$$version" -m "Release version $$version" && \
+	echo "$(GREEN)Tagged release v$$version$(RESET)"
+
+just-publish: ## Push changes and tags to origin
+	@echo "$(BLUE)Publishing to origin...$(RESET)"
+	@git pull origin main --rebase && \
+	git push origin main && \
+	git push origin main --tags
+	@echo "$(GREEN)✅ Published to origin$(RESET)"
+
+publish: clean build release just-publish ## Full publish workflow (clean, build, release, publish)
+	@echo "$(GREEN)✅ Full publish workflow completed$(RESET)"
+
 info: ## Show project information
 	@echo "$(BLUE)Project Information$(RESET)"
 	@echo "==================="
@@ -186,9 +205,9 @@ info: ## Show project information
 	@echo "$(YELLOW)Target Directory:$(RESET) target/"
 	@echo "$(YELLOW)Local Repository:$(RESET) ~/.m2/repository"
 	@echo ""
-	@$(MVN) help:evaluate -Dexpression=project.groupId -q -DforceStdout | xargs -I {} echo "$(YELLOW)Group ID:$(RESET) {}"
-	@$(MVN) help:evaluate -Dexpression=project.artifactId -q -DforceStdout | xargs -I {} echo "$(YELLOW)Artifact ID:$(RESET) {}"
-	@$(MVN) help:evaluate -Dexpression=project.version -q -DforceStdout | xargs -I {} echo "$(YELLOW)Version:$(RESET) {}"
+	@printf "$(YELLOW)Group ID:$(RESET) %s\n" "$$($(MVN) help:evaluate -Dexpression=project.groupId -q -DforceStdout)"
+	@printf "$(YELLOW)Artifact ID:$(RESET) %s\n" "$$($(MVN) help:evaluate -Dexpression=project.artifactId -q -DforceStdout)"
+	@printf "$(YELLOW)Version:$(RESET) %s\n" "$$($(MVN) help:evaluate -Dexpression=project.version -q -DforceStdout)"
 
 # Development shortcuts
 dev: quick ## Alias for quick
