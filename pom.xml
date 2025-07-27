@@ -165,15 +165,15 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <directory>src/main/resources</directory>
                 <includes>
                     <include>**/pom.properties</include>
                 </includes>
             </resource>
             <resource>
-                <directory>src/main/resources</directory>
                 <filtering>false</filtering>
+                <directory>src/main/resources</directory>
                 <excludes>
                     <exclude>**/pom.properties</exclude>
                 </excludes>
@@ -286,17 +286,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Resources Plugin - Enable filtering for pom.properties -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                    <propertiesEncoding>UTF-8</propertiesEncoding>
-                </configuration>
-            </plugin>
-
             <!-- Maven Enforcer Plugin - Enforce build standards -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -361,7 +350,6 @@
                     </archive>
                 </configuration>
             </plugin>
-
 
             <!-- Maven Plugin Plugin -->
             <plugin>
@@ -452,6 +440,17 @@
                     <useReleaseProfile>false</useReleaseProfile>
                     <releaseProfiles>release</releaseProfiles>
                     <goals>deploy</goals>
+                </configuration>
+            </plugin>
+
+            <!-- Maven Resources Plugin - Enable filtering for pom.properties -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <propertiesEncoding>UTF-8</propertiesEncoding>
                 </configuration>
             </plugin>
 

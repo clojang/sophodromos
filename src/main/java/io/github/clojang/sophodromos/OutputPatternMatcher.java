@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 /** Handles pattern matching for different types of test output. */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals") // Necessary for PMD suppression annotations to work
 class OutputPatternMatcher {
+
+  private boolean resultsSeen;
   // Patterns for common test output formats
   private static final Pattern RUNNING_PATTERN =
       Pattern.compile("^(?:\\[INFO\\]\\s+)?Running (.+)$");
@@ -123,7 +125,11 @@ class OutputPatternMatcher {
         executionResult.setExecutionTime((long) (timeElapsed * 1000));
       }
 
-      result = formatTestResults(testsRun, failures, errors, skipped, timeElapsed, formatter);
+      // Only show the first test results summary to avoid duplicates
+      if (!resultsSeen) {
+        resultsSeen = true;
+        result = formatTestResults(testsRun, failures, errors, skipped, timeElapsed, formatter);
+      }
     }
     return result;
   }

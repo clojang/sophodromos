@@ -117,31 +117,19 @@ public class SophoDromosTestMojo extends AbstractMojo {
     System.out.println(headerMessage);
   }
 
-  @SuppressWarnings("PMD.AvoidCatchingGenericException")
+  @SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.DataflowAnomalyAnalysis"})
   private String getSophoDromosVersion() {
+    String result = "unknown";
     try {
-      // First try to read version from Maven properties file (works during development)
-      try (java.io.InputStream stream =
-          this.getClass()
-              .getResourceAsStream(
-                  "/META-INF/maven/io.github.clojang/sophodromos/pom.properties")) {
-        if (stream != null) {
-          final java.util.Properties props = new java.util.Properties();
-          props.load(stream);
-          final String version = props.getProperty("version");
-          if (version != null) {
-            return version;
-          }
-        }
-      }
-
-      // Fallback to package implementation version (works from JAR)
       final Package pkg = this.getClass().getPackage();
       final String version = pkg.getImplementationVersion();
-      return version != null ? version : "unknown";
+      if (version != null) {
+        result = version;
+      }
     } catch (final Exception e) {
-      return "unknown";
+      getLog().debug("Could not retrieve implementation version", e);
     }
+    return result;
   }
 
   private void checkForFailures(final TestExecutionResult result) throws MojoFailureException {
@@ -190,10 +178,7 @@ public class SophoDromosTestMojo extends AbstractMojo {
   }
 
   private void logTestExecutionStart() {
-    final Log log = getLog();
-    if (log.isInfoEnabled()) {
-      log.info("Starting test execution...");
-    }
+    // Intentionally empty - we want clean output without Maven [INFO] messages
   }
 
   @SuppressWarnings("PMD.SystemPrintln") // Intentional console output for clean formatting
