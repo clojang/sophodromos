@@ -77,7 +77,9 @@ class TestOutputCapture {
     String line = reader.readLine();
     while (line != null) {
       final String formattedLine =
-          isError ? interceptor.interceptErrorOutput(line) : interceptor.interceptTestOutput(line);
+          isError
+              ? interceptor.interceptErrorOutput(line)
+              : interceptor.interceptTestOutput(line, result);
 
       processFormattedLine(formattedLine, result, isError);
       line = reader.readLine();

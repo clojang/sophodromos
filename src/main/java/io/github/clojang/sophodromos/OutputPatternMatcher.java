@@ -7,16 +7,17 @@ import java.util.regex.Pattern;
 @SuppressWarnings("PMD.AvoidDuplicateLiterals") // Necessary for PMD suppression annotations to work
 class OutputPatternMatcher {
   // Patterns for common test output formats
-  private static final Pattern RUNNING_PATTERN = Pattern.compile("^Running (.+)$");
+  private static final Pattern RUNNING_PATTERN =
+      Pattern.compile("^(?:\\[INFO\\]\\s+)?Running (.+)$");
   private static final Pattern RESULT_PATTERN =
       Pattern.compile(
-          "^Tests run: (\\d+), Failures: (\\d+), Errors: (\\d+), "
-              + "Skipped: (\\d+), Time elapsed: ([\\d.]+) sec");
+          "^(?:\\[INFO\\]\\s+)?Tests run: (\\d+), Failures: (\\d+), Errors: (\\d+), "
+              + "Skipped: (\\d+)(?:, Time elapsed: ([\\d.]+) s(?: -- in (.+))?)?$");
   private static final Pattern TEST_FAIL_PTN =
       Pattern.compile(
-          "^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+sec" + "\\s+<<<\\s+(FAILURE|ERROR)!");
+          "^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+s(?:ec)?\\s+<<<\\s+(FAILURE|ERROR)!");
   private static final Pattern SUCCESS_PATTERN =
-      Pattern.compile("^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+sec$");
+      Pattern.compile("^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+s(?:ec)?$");
 
   /** Constructs a new OutputPatternMatcher. */
   public OutputPatternMatcher() {
@@ -97,22 +98,32 @@ class OutputPatternMatcher {
    *
    * @param line the line to match
    * @param formatter the output formatter
+   * @param executionResult the execution result to update (optional)
    * @return formatted result or null if no match
    */
   @SuppressWarnings({"PMD.DataflowAnomalyAnalysis", "PMD.LawOfDemeter"})
   // False positive from OnlyOneReturn refactoring
-  protected String tryMatchTestResults(final String line, final TestOutputFormatter formatter) {
+  protected String tryMatchTestResults(
+      final String line,
+      final TestOutputFormatter formatter,
+      final TestExecutionResult executionResult) {
     String result = null;
     final Matcher resultMatcher = RESULT_PATTERN.matcher(line);
     if (resultMatcher.matches()) {
-      result =
-          formatTestResults(
-              Integer.parseInt(resultMatcher.group(1)), // tests run
-              Integer.parseInt(resultMatcher.group(2)), // failures
-              Integer.parseInt(resultMatcher.group(3)), // errors
-              Integer.parseInt(resultMatcher.group(4)), // skipped
-              Double.parseDouble(resultMatcher.group(5)), // time
-              formatter);
+      final int testsRun = Integer.parseInt(resultMatcher.group(1));
+      final int failures = Integer.parseInt(resultMatcher.group(2));
+      final int errors = Integer.parseInt(resultMatcher.group(3));
+      final int skipped = Integer.parseInt(resultMatcher.group(4));
+      final double timeElapsed =
+          resultMatcher.group(5) != null ? Double.parseDouble(resultMatcher.group(5)) : 0.0;
+
+      // Update the execution result if provided
+      if (executionResult != null) {
+        executionResult.updateFromSurefireOutput(testsRun, failures, errors, skipped);
+        executionResult.setExecutionTime((long) (timeElapsed * 1000));
+      }
+
+      result = formatTestResults(testsRun, failures, errors, skipped, timeElapsed, formatter);
     }
     return result;
   }

@@ -130,6 +130,7 @@ public class SophoDromosTestMojo extends AbstractMojo {
     threadManager.waitForCompletion();
 
     result.setExitCode(exitCode);
+
     return result;
   }
 

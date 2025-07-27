@@ -1,7 +1,7 @@
 # Makefile for SophoDromos Maven Plugin
 # Provides convenient commands for development workflow
 
-.PHONY: help build clean test lint format publish-local check-types install deps version release just-publish publish
+.PHONY: help build clean test lint format publish-local check-types install deps version release just-publish publish micro+ minor+ major+
 
 # Default target
 .DEFAULT_GOAL := help
@@ -179,6 +179,42 @@ clean-all: clean ## Clean everything including IDE files
 
 version: ## Show current project version
 	@$(MVN) help:evaluate -Dexpression=project.version -q -DforceStdout
+
+micro+: ## Increment micro/patch version (x.y.z -> x.y.z+1)
+	@echo "$(BLUE)Incrementing micro version...$(RESET)"
+	@current=$$($(MVN) help:evaluate -Dexpression=project.version -q -DforceStdout) && \
+	echo "$(YELLOW)Current version: $$current$(RESET)" && \
+	major=$$(echo $$current | cut -d. -f1) && \
+	minor=$$(echo $$current | cut -d. -f2) && \
+	micro=$$(echo $$current | cut -d. -f3) && \
+	new_micro=$$((micro + 1)) && \
+	new_version="$$major.$$minor.$$new_micro" && \
+	sed -i.bak "s|<version>$$current</version>|<version>$$new_version</version>|g" pom.xml && \
+	rm -f pom.xml.bak && \
+	echo "$(GREEN)✅ Version updated to: $$new_version$(RESET)"
+
+minor+: ## Increment minor version (x.y.z -> x.y+1.0)
+	@echo "$(BLUE)Incrementing minor version...$(RESET)"
+	@current=$$($(MVN) help:evaluate -Dexpression=project.version -q -DforceStdout) && \
+	echo "$(YELLOW)Current version: $$current$(RESET)" && \
+	major=$$(echo $$current | cut -d. -f1) && \
+	minor=$$(echo $$current | cut -d. -f2) && \
+	new_minor=$$((minor + 1)) && \
+	new_version="$$major.$$new_minor.0" && \
+	sed -i.bak "s|<version>$$current</version>|<version>$$new_version</version>|g" pom.xml && \
+	rm -f pom.xml.bak && \
+	echo "$(GREEN)✅ Version updated to: $$new_version$(RESET)"
+
+major+: ## Increment major version (x.y.z -> x+1.0.0)
+	@echo "$(BLUE)Incrementing major version...$(RESET)"
+	@current=$$($(MVN) help:evaluate -Dexpression=project.version -q -DforceStdout) && \
+	echo "$(YELLOW)Current version: $$current$(RESET)" && \
+	major=$$(echo $$current | cut -d. -f1) && \
+	new_major=$$((major + 1)) && \
+	new_version="$$new_major.0.0" && \
+	sed -i.bak "s|<version>$$current</version>|<version>$$new_version</version>|g" pom.xml && \
+	rm -f pom.xml.bak && \
+	echo "$(GREEN)✅ Version updated to: $$new_version$(RESET)"
 
 release: ## Create and tag release version
 	@echo "$(BLUE)Creating release...$(RESET)"

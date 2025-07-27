@@ -36,7 +36,7 @@ class HeaderFooterFormatter {
 
     printer.println(printStream, "");
     printer.printHeading(printStream, colors, "=", AnsiColors.BRIGHT_GREEN);
-    printer.println(printStream, colors.colorize("Running tests with " + title, AnsiColors.GREEN));
+    printer.println(printStream, colors.colorize(title, AnsiColors.GREEN));
     printer.printHeading(printStream, colors, "-", AnsiColors.BRIGHT_GREEN);
 
     return baos.toString(StandardCharsets.UTF_8);

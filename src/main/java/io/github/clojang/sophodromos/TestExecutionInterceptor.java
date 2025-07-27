@@ -29,27 +29,38 @@ public class TestExecutionInterceptor {
    * @return the formatted output line or null if the line should be skipped
    */
   public String interceptTestOutput(final String line) {
-    String result;
+    return interceptTestOutput(line, null);
+  }
+
+  /**
+   * Intercepts and processes test output lines with result tracking.
+   *
+   * @param line the output line to process
+   * @param executionResult the test execution result to update (optional)
+   * @return the formatted output line or null if the line should be skipped
+   */
+  public String interceptTestOutput(final String line, final TestExecutionResult executionResult) {
+    String formattedLine;
 
     if (line == null || line.isBlank()) {
-      result = line;
+      formattedLine = line;
     } else {
-      result = patternMatcher.tryMatchTestClassExecution(line, formatter);
-      if (result == null) {
-        result = patternMatcher.tryMatchIndividualTest(line, formatter);
+      formattedLine = patternMatcher.tryMatchTestClassExecution(line, formatter);
+      if (formattedLine == null) {
+        formattedLine = patternMatcher.tryMatchIndividualTest(line, formatter);
       }
-      if (result == null) {
-        result = patternMatcher.tryMatchTestSuccess(line, formatter);
+      if (formattedLine == null) {
+        formattedLine = patternMatcher.tryMatchTestSuccess(line, formatter);
       }
-      if (result == null) {
-        result = patternMatcher.tryMatchTestResults(line, formatter);
+      if (formattedLine == null) {
+        formattedLine = patternMatcher.tryMatchTestResults(line, formatter, executionResult);
       }
-      if (result == null) {
-        result = lineProcessor.preprocessOutputLine(line);
+      if (formattedLine == null) {
+        formattedLine = lineProcessor.preprocessOutputLine(line);
       }
     }
 
-    return result;
+    return formattedLine;
   }
 
   /**

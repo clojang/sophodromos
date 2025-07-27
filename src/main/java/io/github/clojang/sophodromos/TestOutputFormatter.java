@@ -16,7 +16,6 @@ public class TestOutputFormatter {
 
   private final GradlDromusExtension extension;
   private final AnsiColors colors;
-  private final CleanTerminalPrinter printer;
   private final HeaderFooterFormatter headerFormatter;
   private final ProgressFormatter progressFormatter;
   private final TestResultFormatter resultFormatter;
@@ -36,7 +35,7 @@ public class TestOutputFormatter {
     this.extension.setShowStackTraces(detailedFailures);
 
     this.colors = new AnsiColors(colorOutput);
-    this.printer = new CleanTerminalPrinter(extension);
+    final CleanTerminalPrinter printer = new CleanTerminalPrinter(extension);
     this.headerFormatter = new HeaderFooterFormatter(printer, colors);
     this.progressFormatter = new ProgressFormatter(colors);
     this.resultFormatter = new TestResultFormatter(colors, extension);
@@ -174,20 +173,5 @@ public class TestOutputFormatter {
   public String formatTestResult(
       final String className, final String methodName, final String status, final long duration) {
     return resultFormatter.formatTestResult(className, methodName, status, duration);
-  }
-
-  // Getters to access GradlDromus configuration
-  @SuppressWarnings("EI_EXPOSE_REP")
-  public GradlDromusExtension getExtension() {
-    return extension;
-  }
-
-  public AnsiColors getColors() {
-    return colors;
-  }
-
-  @SuppressWarnings("EI_EXPOSE_REP")
-  public CleanTerminalPrinter getPrinter() {
-    return printer;
   }
 }

@@ -1,21 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
-    <!-- Exclude generated HelpMojo from analysis -->
+    <!-- Exclude generated HelpMojo from SpotBugs analysis -->
     <Match>
-        <Class name="io.github.clojang.sophodromos.HelpMojo"/>
+        <Class name="~.*HelpMojo"/>
         <Bug pattern="UI_INHERITANCE_UNSAFE_GETRESOURCE"/>
-    </Match>
-    
-    <!-- Allow intentional exposure of configuration objects -->
-    <Match>
-        <Class name="io.github.clojang.sophodromos.TestOutputFormatter"/>
-        <Method name="getExtension"/>
-        <Bug pattern="EI_EXPOSE_REP"/>
-    </Match>
-    
-    <Match>
-        <Class name="io.github.clojang.sophodromos.TestOutputFormatter"/>
-        <Method name="getPrinter"/>
-        <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
 </FindBugsFilter>
