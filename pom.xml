@@ -193,9 +193,9 @@
                             <style>GOOGLE</style>
                             <reflowLongStrings>true</reflowLongStrings>
                         </googleJavaFormat>
-                        <importOrder></importOrder>
-                        <removeUnusedImports></removeUnusedImports>
-                        <formatAnnotations></formatAnnotations>
+                        <importOrder/>
+                        <removeUnusedImports/>
+                        <formatAnnotations/>
                     </java>
                     <pom>
                         <sortPom>
@@ -305,8 +305,8 @@
                                 <requireJavaVersion>
                                     <version>17</version>
                                 </requireJavaVersion>
-                                <dependencyConvergence></dependencyConvergence>
-                                <banDuplicatePomDependencyVersions></banDuplicatePomDependencyVersions>
+                                <dependencyConvergence/>
+                                <banDuplicatePomDependencyVersions/>
                             </rules>
                         </configuration>
                     </execution>
