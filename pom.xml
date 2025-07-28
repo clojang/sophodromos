@@ -4,7 +4,7 @@
 
     <groupId>io.github.clojang</groupId>
     <artifactId>sophodromos</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
     <packaging>maven-plugin</packaging>
 
     <name>SophoDromos</name>
