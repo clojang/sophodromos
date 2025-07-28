@@ -4,7 +4,7 @@
 
     <groupId>io.github.clojang</groupId>
     <artifactId>sophodromos</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
     <packaging>maven-plugin</packaging>
 
     <name>SophoDromos</name>
@@ -30,6 +30,13 @@
         <developerConnection>scm:git:ssh://github.com:sophodromos/sophodromos-maven-plugin.git</developerConnection>
         <url>https://github.com/sophodromos/sophodromos-maven-plugin/tree/main</url>
     </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <url>https://central.sonatype.com/api/v1/publisher</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -568,13 +575,6 @@
         </plugins>
     </reporting>
 
-    <distributionManagement>
-        <repository>
-            <id>central</id>
-            <url>https://central.sonatype.com/api/v1/publisher</url>
-        </repository>
-    </distributionManagement>
-
     <profiles>
         <!-- Release Profile -->
         <profile>
@@ -653,10 +653,10 @@
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
-                                <phase>verify</phase>
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                                <phase>verify</phase>
                                 <configuration>
                                     <gpgArguments>
                                         <arg>--pinentry-mode</arg>
