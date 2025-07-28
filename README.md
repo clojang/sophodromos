@@ -28,7 +28,7 @@ Add to your project's `pom.xml`:
     <dependency>
         <groupId>io.github.clojang</groupId>
         <artifactId>sophodromos</artifactId>
-        <version>0.1.1</version>
+        <version>0.1.2</version>
     </dependency>
 </dependencies>
 ```
@@ -252,7 +252,7 @@ Failure Predictions:
 <plugin>
     <groupId>io.github.clojang</groupId>
     <artifactId>sophodromos-maven-plugin</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <configuration>
         <parallelism>6</parallelism>
         <intelligentSelection>true</intelligentSelection>
