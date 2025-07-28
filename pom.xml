@@ -701,6 +701,18 @@
             </build>
         </profile>
 
+        <!-- GitHub Packages Profile -->
+        <profile>
+            <id>github-packages</id>
+            <distributionManagement>
+                <repository>
+                    <id>github</id>
+                    <name>GitHub Packages</name>
+                    <url>https://maven.pkg.github.com/clojang/sophodromos</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+
         <!-- Skip Quality Checks Profile -->
         <profile>
             <id>skip-quality</id>
