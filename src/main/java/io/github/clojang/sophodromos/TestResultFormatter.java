@@ -7,8 +7,8 @@ import java.util.Locale;
 /** Handles individual test result formatting. */
 @SuppressWarnings("PMD.TestClassWithoutTestCases") // This is not a test class
 class TestResultFormatter {
-  private static final String INDENT = "    ";
-  private static final int DOTS_BASE = 76;
+  private static final String INDENT = "";
+  private static final int DOTS_BASE = 78;
 
   private final AnsiColors colors;
   private final GradlDromusExtension extension;

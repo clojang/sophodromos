@@ -125,7 +125,7 @@ class OutputPatternMatcher {
       final String methodWithParens = methodName + "()";
       result =
           formatter.formatTestResult(
-              className, methodWithParens, "SUCCESS", (long) (timeElapsed * 1000));
+              "  " + className, methodWithParens, "SUCCESS", (long) (timeElapsed * 1000));
     }
     return result;
   }
@@ -179,15 +179,15 @@ class OutputPatternMatcher {
    */
   protected String formatModuleHeader(
       final String artifactId, final TestOutputFormatter formatter) {
-    final String moduleHeader = colors.colorize(
-            artifactId, AnsiColors.BOLD + AnsiColors.BRIGHT_YELLOW);
-    return formatter.formatProgressLine(moduleHeader);
+    return colors.colorize(artifactId, AnsiColors.BOLD + AnsiColors.BRIGHT_YELLOW);
   }
 
   private String getSimpleClassName(final String testClass) {
     return testClass.substring(testClass.lastIndexOf('.') + 1);
   }
 
+  @SuppressWarnings("PMD.UnusedFormalParameter")
+  // Parameters intentionally unused in current implementation
   private String formatTestResults(
       final int testsRun,
       final int failures,
@@ -197,27 +197,27 @@ class OutputPatternMatcher {
       final TestOutputFormatter formatter) {
     final StringBuilder result = new StringBuilder();
 
-    //    if (failures == 0 && errors == 0) {
-    //      result.append("✅ ");
-    //    } else {
-    //      result.append("❌ ");
-    //    }
+    // if (failures == 0 && errors == 0) {
+    //   result.append("✅ ");
+    // } else {
+    //   result.append("❌ ");
+    // }
 
-    //result.append(String.format("Tests: %d", testsRun));
+    // result.append(String.format("Tests: %d", testsRun));
 
-    //if (failures > 0) {
-    //  result.append(String.format(", Failures: %d", failures));
-    //}
+    // if (failures > 0) {
+    //   result.append(String.format(", Failures: %d", failures));
+    // }
 
-    //if (errors > 0) {
-    //  result.append(String.format(", Errors: %d", errors));
-    //}
+    // if (errors > 0) {
+    //   result.append(String.format(", Errors: %d", errors));
+    // }
 
-    //if (skipped > 0) {
-    //  result.append(String.format(", Skipped: %d", skipped));
-    //}
+    // if (skipped > 0) {
+    //   result.append(String.format(", Skipped: %d", skipped));
+    // }
 
-    //result.append(String.format(" (%.3fs)", timeElapsed));
+    // result.append(String.format(" (%.3fs)", timeElapsed));
 
     return formatter.formatProgressLine(result.toString());
   }

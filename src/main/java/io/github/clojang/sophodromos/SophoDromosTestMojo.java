@@ -121,7 +121,8 @@ public class SophoDromosTestMojo extends AbstractMojo {
   @SuppressWarnings("PMD.SystemPrintln") // Intentional console output for clean formatting
   private void displayModuleHeader() {
     final String artifactId = project.getArtifactId();
-    final String moduleHeader = ":" + artifactId + ":test";
+    final OutputPatternMatcher patternMatcher = new OutputPatternMatcher(formatter.getColors());
+    final String moduleHeader = patternMatcher.formatModuleHeader(artifactId, formatter);
     System.out.println(moduleHeader);
   }
 
