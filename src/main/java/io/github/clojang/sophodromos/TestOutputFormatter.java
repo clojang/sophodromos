@@ -162,6 +162,15 @@ public class TestOutputFormatter {
   }
 
   /**
+   * Gets the AnsiColors instance for external use.
+   *
+   * @return the AnsiColors instance
+   */
+  public AnsiColors getColors() {
+    return colors;
+  }
+
+  /**
    * Formats an individual test result.
    *
    * @param className the test class name

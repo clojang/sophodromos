@@ -68,6 +68,7 @@ public class SophoDromosTestMojo extends AbstractMojo {
     try {
       initializeComponents();
       displayHeader();
+      displayModuleHeader();
       final TestExecutionResult result = executeTestsWithInterception();
       displayFormattedResults(result);
       checkForFailures(result);
@@ -115,6 +116,13 @@ public class SophoDromosTestMojo extends AbstractMojo {
     final String headerMessage =
         formatter.formatHeader("SophoDromos Test Runner (version: " + version + ")");
     System.out.println(headerMessage);
+  }
+
+  @SuppressWarnings("PMD.SystemPrintln") // Intentional console output for clean formatting
+  private void displayModuleHeader() {
+    final String artifactId = project.getArtifactId();
+    final String moduleHeader = ":" + artifactId + ":test";
+    System.out.println(moduleHeader);
   }
 
   @SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.DataflowAnomalyAnalysis"})

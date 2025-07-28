@@ -35,6 +35,9 @@ class TestProcessManager {
     command.add("mvn");
     command.add("surefire:test");
     command.add("-Dmaven.test.failure.ignore=true");
+    command.add("-Dsurefire.printSummary=true");
+    command.add("-Dsurefire.reportFormat=plain");
+    command.add("-Dsurefire.useFile=false");
 
     final ProcessBuilder processBuilder = new ProcessBuilder(command);
     processBuilder.directory(project.getBasedir());

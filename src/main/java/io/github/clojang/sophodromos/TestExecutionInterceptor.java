@@ -18,7 +18,7 @@ public class TestExecutionInterceptor {
    */
   public TestExecutionInterceptor(final MavenProject project, final TestOutputFormatter formatter) {
     this.formatter = formatter;
-    this.patternMatcher = new OutputPatternMatcher();
+    this.patternMatcher = new OutputPatternMatcher(formatter.getColors());
     this.lineProcessor = new OutputLineProcessor(project, formatter);
   }
 
@@ -51,6 +51,9 @@ public class TestExecutionInterceptor {
       }
       if (formattedLine == null) {
         formattedLine = patternMatcher.tryMatchTestSuccess(line, formatter);
+      }
+      if (formattedLine == null) {
+        formattedLine = patternMatcher.tryMatchMethodExecution(line, formatter);
       }
       if (formattedLine == null) {
         formattedLine = patternMatcher.tryMatchTestResults(line, formatter, executionResult);
