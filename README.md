@@ -28,7 +28,7 @@ Add to your project's `pom.xml`:
     <dependency>
         <groupId>io.github.clojang</groupId>
         <artifactId>sophodromos</artifactId>
-        <version>0.1.2</version>
+        <version>0.1.3</version>
     </dependency>
 </dependencies>
 ```
@@ -39,7 +39,7 @@ Add to your `build.gradle`:
 
 ```kotlin
 dependencies {
-    implementation 'io.github.clojang:sophodromos:1.0.0'
+    implementation 'io.github.clojang:sophodromos:0.1.3'
 }
 ```
 
@@ -252,7 +252,7 @@ Failure Predictions:
 <plugin>
     <groupId>io.github.clojang</groupId>
     <artifactId>sophodromos-maven-plugin</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
     <configuration>
         <parallelism>6</parallelism>
         <intelligentSelection>true</intelligentSelection>
