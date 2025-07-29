@@ -27,12 +27,44 @@ public class TestOutputFormatter {
    * @param detailedFailures whether to show detailed failure information
    */
   public TestOutputFormatter(final boolean colorOutput, final boolean detailedFailures) {
+    this(colorOutput, detailedFailures, true, "💚", "💔", "💤", 0);
+  }
+
+  /**
+   * Constructs a new TestOutputFormatter with enhanced configuration.
+   *
+   * @param colorOutput whether to use colored output
+   * @param detailedFailures whether to show detailed failure information
+   * @param showTimings whether to show timing information
+   * @param passSymbol symbol for passed tests
+   * @param failSymbol symbol for failed tests
+   * @param skipSymbol symbol for skipped tests
+   * @param terminalWidth terminal width override (0 for auto-detect)
+   */
+  public TestOutputFormatter(
+      final boolean colorOutput,
+      final boolean detailedFailures,
+      final boolean showTimings,
+      final String passSymbol,
+      final String failSymbol,
+      final String skipSymbol,
+      final int terminalWidth) {
     // Create GradlDromus extension with our preferences
     this.extension = new GradlDromusExtension();
     this.extension.setUseColors(colorOutput);
-    this.extension.setShowTimings(true);
+    this.extension.setShowTimings(showTimings);
     this.extension.setShowExceptions(detailedFailures);
     this.extension.setShowStackTraces(detailedFailures);
+
+    // Set custom symbols
+    this.extension.setPassSymbol(passSymbol);
+    this.extension.setFailSymbol(failSymbol);
+    this.extension.setSkipSymbol(skipSymbol);
+
+    // Set terminal width if specified
+    if (terminalWidth > 0) {
+      this.extension.setTerminalWidth(terminalWidth);
+    }
 
     this.colors = new AnsiColors(colorOutput);
     final CleanTerminalPrinter printer = new CleanTerminalPrinter(extension);

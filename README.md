@@ -76,6 +76,22 @@ Configure the plugin in your `pom.xml`:
     <artifactId>sophodromos</artifactId>
     <version>0.1.8</version>
     <configuration>
+        <!-- Display options -->
+        <showModuleNames>true</showModuleNames>
+        <showMethodNames>true</showMethodNames>
+        <showTimings>true</showTimings>
+        <useColors>true</useColors>
+        
+        <!-- Terminal settings -->
+        <terminalWidth>0</terminalWidth>
+        <suppressOutput>false</suppressOutput>
+        
+        <!-- Custom status symbols -->
+        <passSymbol>💚</passSymbol>
+        <failSymbol>💔</failSymbol>
+        <skipSymbol>💤</skipSymbol>
+        
+        <!-- Legacy options (still supported) -->
         <colorOutput>true</colorOutput>
         <showProgress>true</showProgress>
         <detailedFailures>true</detailedFailures>
@@ -89,25 +105,46 @@ Configure the plugin in your `pom.xml`:
 You can also configure options via system properties:
 
 ```bash
-# Disable colored output
+# Display control
+mvn sd:test -Dsophodromos.showModuleNames=false
+mvn sd:test -Dsophodromos.showMethodNames=false
+mvn sd:test -Dsophodromos.showTimings=false
+mvn sd:test -Dsophodromos.useColors=false
+
+# Custom symbols
+mvn sd:test -Dsophodromos.passSymbol=✅
+mvn sd:test -Dsophodromos.failSymbol=❌
+mvn sd:test -Dsophodromos.skipSymbol=⏭️
+
+# Terminal settings
+mvn sd:test -Dsophodromos.terminalWidth=120
+
+# Legacy options
 mvn sd:test -Dsophodromos.colorOutput=false
-
-# Skip sophodromos tests
-mvn sd:test -Dsophodromos.skip=true
-
-# Hide individual test progress
 mvn sd:test -Dsophodromos.showProgress=false
-
-# Hide detailed failure information
 mvn sd:test -Dsophodromos.detailedFailures=false
+mvn sd:test -Dsophodromos.skip=true
 ```
 
 ### Configuration Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `colorOutput` | boolean | `true` | Enable colored output |
-| `showProgress` | boolean | `true` | Show individual test progress during execution |
+| **Display Options** | | | |
+| `showModuleNames` | boolean | `true` | Show module/project names in output |
+| `showMethodNames` | boolean | `true` | Show individual test method names during execution |
+| `showTimings` | boolean | `true` | Show execution times for tests |
+| `useColors` | boolean | `true` | Enable colorized output |
+| **Terminal Settings** | | | |
+| `terminalWidth` | int | `0` | Override terminal width detection (0 = auto-detect) |
+| `suppressOutput` | boolean | `false` | Suppress Maven's default test output |
+| **Custom Symbols** | | | |
+| `passSymbol` | String | `💚` | Symbol for passed tests |
+| `failSymbol` | String | `💔` | Symbol for failed tests |
+| `skipSymbol` | String | `💤` | Symbol for skipped tests |
+| **Legacy Options** | | | |
+| `colorOutput` | boolean | `true` | Enable colored output (same as `useColors`) |
+| `showProgress` | boolean | `true` | Show test progress (same as `showMethodNames`) |
 | `detailedFailures` | boolean | `true` | Show detailed failure information when tests fail |
 | `skipTests` | boolean | `false` | Skip running tests entirely |
 

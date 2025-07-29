@@ -21,9 +21,11 @@ import org.apache.maven.project.MavenProject;
     threadSafe = true)
 @SuppressWarnings({
   "PMD.TooManyMethods",
+  "PMD.TooManyFields",
   "PMD.LawOfDemeter",
   "PMD.UnnecessaryConstructor",
-  "PMD.CloseResource"
+  "PMD.CloseResource",
+  "PMD.AvoidDuplicateLiterals"
 })
 // Standard Maven plugin patterns
 public class SophoDromosTestMojo extends AbstractMojo {
@@ -45,6 +47,36 @@ public class SophoDromosTestMojo extends AbstractMojo {
 
   @Parameter(property = "sophodromos.detailedFailures", defaultValue = "true")
   private boolean detailedFailures;
+
+  // Display options (matching gradldromus)
+  @Parameter(property = "sophodromos.showModuleNames", defaultValue = "true")
+  private boolean showModuleNames;
+
+  @Parameter(property = "sophodromos.showMethodNames", defaultValue = "true")
+  private boolean showMethodNames;
+
+  @Parameter(property = "sophodromos.showTimings", defaultValue = "true")
+  private boolean showTimings;
+
+  @Parameter(property = "sophodromos.useColors", defaultValue = "true")
+  private boolean useColors;
+
+  // Terminal settings
+  @Parameter(property = "sophodromos.terminalWidth", defaultValue = "0")
+  private int terminalWidth;
+
+  @Parameter(property = "sophodromos.suppressOutput", defaultValue = "false")
+  private boolean suppressOutput;
+
+  // Custom symbols
+  @Parameter(property = "sophodromos.passSymbol", defaultValue = "💚")
+  private String passSymbol;
+
+  @Parameter(property = "sophodromos.failSymbol", defaultValue = "💔")
+  private String failSymbol;
+
+  @Parameter(property = "sophodromos.skipSymbol", defaultValue = "💤")
+  private String skipSymbol;
 
   private TestOutputFormatter formatter;
   private TestProcessManager processManager;
@@ -104,10 +136,20 @@ public class SophoDromosTestMojo extends AbstractMojo {
   }
 
   private void initializeComponents() {
-    formatter = new TestOutputFormatter(colorOutput, detailedFailures);
+    // Create formatter with enhanced configuration
+    formatter =
+        new TestOutputFormatter(
+            useColors && colorOutput, // Use both old and new color flags
+            detailedFailures,
+            showTimings,
+            passSymbol,
+            failSymbol,
+            skipSymbol,
+            terminalWidth);
+
     final TestExecutionInterceptor interceptor = new TestExecutionInterceptor(project, formatter);
     processManager = new TestProcessManager(project);
-    outputCapture = new TestOutputCapture(interceptor, showProgress, getLog());
+    outputCapture = new TestOutputCapture(interceptor, showProgress && showMethodNames, getLog());
   }
 
   @SuppressWarnings("PMD.SystemPrintln") // Intentional console output for clean formatting
@@ -120,10 +162,12 @@ public class SophoDromosTestMojo extends AbstractMojo {
 
   @SuppressWarnings("PMD.SystemPrintln") // Intentional console output for clean formatting
   private void displayModuleHeader() {
-    final String artifactId = project.getArtifactId();
-    final OutputPatternMatcher patternMatcher = new OutputPatternMatcher(formatter.getColors());
-    final String moduleHeader = patternMatcher.formatModuleHeader(artifactId, formatter);
-    System.out.println(moduleHeader);
+    if (showModuleNames) {
+      final String artifactId = project.getArtifactId();
+      final OutputPatternMatcher patternMatcher = new OutputPatternMatcher(formatter.getColors());
+      final String moduleHeader = patternMatcher.formatModuleHeader(artifactId, formatter);
+      System.out.println(moduleHeader);
+    }
   }
 
   @SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.DataflowAnomalyAnalysis"})
