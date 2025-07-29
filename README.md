@@ -4,301 +4,134 @@
 
 [![Project Logo][logo]][logo-large]
 
-*A wise and efficient test runner with intelligent execution strategies*
+*An explicit, clean, and beautiful test formatter for Maven's test runner*
 
-Sophodromos (from Greek "sophos" meaning wise + "dromos" meaning running/course) is a smart test execution framework that optimizes test runs through intelligent analysis and strategic execution planning.
-
-## Features
-
-🧠 **Intelligent Test Selection** - Analyzes code changes to run only relevant tests  
-⚡ **Parallel Execution** - Optimizes test parallelization based on historical performance data  
-📈 **Performance Analytics** - Tracks and analyzes test performance trends over time  
-🎯 **Failure Prediction** - Uses ML techniques to predict and prevent test failures  
-🔄 **Adaptive Strategies** - Learns from previous runs to improve execution efficiency  
-💾 **Persistent Cache** - Maintains intelligent caching of test results and metadata  
+Sophodromos is a simple Maven plugin that formats test output in a clean, readable style inspired by GradlDromus. It runs your tests using Maven Surefire and provides colorized, progress-based output that's easy to read and understand.
 
 ## Installation
 
-### Maven Dependency
-
-Add to your project's `pom.xml`:
+Add the plugin to your project's `pom.xml`:
 
 ```xml
-<dependencies>
-    <dependency>
-        <groupId>io.github.clojang</groupId>
-        <artifactId>sophodromos</artifactId>
-        <version>0.1.7</version>
-    </dependency>
-</dependencies>
+<plugin>
+    <groupId>io.github.clojang</groupId>
+    <artifactId>sophodromos</artifactId>
+    <version>0.1.8</version>
+</plugin>
 ```
 
-### Gradle Dependency
+## Usage
 
-Add to your `build.gradle`:
+### Basic Usage
 
-```kotlin
-dependencies {
-    implementation 'io.github.clojang:sophodromos:0.1.7'
-}
+Run tests with sophodromos formatting:
+
+```bash
+mvn sd:test
 ```
 
-### Plugin Configuration
+### Recommended Usage
 
-For Gradle projects:
+To avoid running tests twice (Maven's default tests + sophodromos), use:
 
-```kotlin
-plugins {
-    id("io.github.clojang.sophodromos") version "1.0.0"
-}
+```bash
+mvn compile sd:test
+# or
+mvn install -Dmaven.test.skip=true sd:test
 ```
 
-## Quick Start
+### Example Output
 
-Here's a simple example to get you started:
+```
+================================================================================
+SophoDromos Test Runner (version: 0.1.8)
+--------------------------------------------------------------------------------
 
-```java
-import io.github.clojang.sophodromos.SophodromosRunner;
-import io.github.clojang.sophodromos.config.ExecutionConfig;
+my-project
 
-public class MyTestSuite {
-    public static void main(String[] args) {
-        // Setup intelligent test execution
-        ExecutionConfig config = new ExecutionConfig()
-            .setParallelism(4)
-            .setIntelligentSelection(true)
-            .setPerformanceTracking(true)
-            .setCacheResults(true);
-        
-        SophodromosRunner runner = new SophodromosRunner(config);
-        runner.executeTests("src/test/java");
-    }
-}
+  SimpleTest.testAddition() ..................................................💚 (2ms)
+  SimpleTest.testSubtraction() ...............................................💚
+  SimpleTest.testMultiplication() ...........................................💚
+  AnotherTests.testDivision() ................................................💚
+  AnotherTests.testModulo() ..................................................💚
+
+Test Summary:
+─────────────
+Total: 5 tests, 💚 5 passed, 💔 0 failed, 💤 0 skipped
+Time: 0.0s
+
+✨ All tests passed!
+================================================================================
 ```
 
 ## Configuration
 
-Configure Sophodromos using the `ExecutionConfig` class:
+### Plugin Configuration
 
-```java
-ExecutionConfig config = new ExecutionConfig()
-    .setParallelism(8)                    // Number of parallel test threads
-    .setIntelligentSelection(true)        // Enable smart test selection
-    .setPerformanceTracking(true)         // Track test performance metrics
-    .setCacheResults(true)                // Cache test results
-    .setFailurePrediction(true)           // Enable ML-based failure prediction
-    .setExecutionStrategy("adaptive")     // Execution strategy
-    .setReportFormat("detailed");         // Report output format
+Configure the plugin in your `pom.xml`:
 
-SophodromosRunner runner = new SophodromosRunner(config);
+```xml
+<plugin>
+    <groupId>io.github.clojang</groupId>
+    <artifactId>sophodromos</artifactId>
+    <version>0.1.8</version>
+    <configuration>
+        <colorOutput>true</colorOutput>
+        <showProgress>true</showProgress>
+        <detailedFailures>true</detailedFailures>
+        <skipTests>false</skipTests>
+    </configuration>
+</plugin>
+```
+
+### Command Line Options
+
+You can also configure options via system properties:
+
+```bash
+# Disable colored output
+mvn sd:test -Dsophodromos.colorOutput=false
+
+# Skip sophodromos tests
+mvn sd:test -Dsophodromos.skip=true
+
+# Hide individual test progress
+mvn sd:test -Dsophodromos.showProgress=false
+
+# Hide detailed failure information
+mvn sd:test -Dsophodromos.detailedFailures=false
 ```
 
 ### Configuration Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `parallelism` | int | 4 | Number of parallel execution threads |
-| `intelligentSelection` | boolean | true | Enable smart test selection based on code changes |
-| `performanceTracking` | boolean | true | Track and analyze test performance over time |
-| `cacheResults` | boolean | true | Cache test results for faster subsequent runs |
-| `failurePrediction` | boolean | false | Use ML to predict potential test failures |
-| `executionStrategy` | String | "adaptive" | Execution strategy (adaptive, sequential, parallel, priority) |
-| `reportFormat` | String | "summary" | Report format (summary, detailed, json, xml) |
+| `colorOutput` | boolean | `true` | Enable colored output |
+| `showProgress` | boolean | `true` | Show individual test progress during execution |
+| `detailedFailures` | boolean | `true` | Show detailed failure information when tests fail |
+| `skipTests` | boolean | `false` | Skip running tests entirely |
 
-## Execution Strategies
+## Project Types
 
-Sophodromos supports multiple execution strategies:
+Sophodromos works with all Maven project structures:
 
-### Adaptive Strategy (Recommended)
-```java
-config.setExecutionStrategy("adaptive");
-```
-Automatically adjusts execution based on historical data and current system resources.
+- **Single-module projects**: Standard `src/test/java` layout
+- **Multi-module projects**: Runs tests for each module separately
+- **Traditional layouts**: Any Maven-compatible test structure
 
-### Priority Strategy
-```java
-config.setExecutionStrategy("priority");
-```
-Executes tests based on failure probability and impact analysis.
+## Features
 
-### Parallel Strategy
-```java
-config.setExecutionStrategy("parallel");
-```
-Maximizes parallel execution while respecting resource constraints.
+- **Clean Output**: Beautiful, readable test formatting
+- **Color Support**: Green checkmarks for passed tests, red X's for failures
+- **Progress Indicators**: See tests as they run
+- **Timing Information**: Shows execution time for individual tests
+- **Multi-module Support**: Works seamlessly with Maven reactor builds
+- **Surefire Integration**: Uses Maven Surefire under the hood
 
-### Sequential Strategy
-```java
-config.setExecutionStrategy("sequential");
-```
-Traditional sequential execution for debugging or resource-constrained environments.
+## Requirements
 
-## Intelligent Test Selection
-
-Sophodromos analyzes your codebase to determine which tests need to run:
-
-```java
-// Analyze changes since last commit
-runner.analyzeChanges("HEAD~1");
-
-// Run only tests affected by changes
-TestResults results = runner.executeSelectedTests();
-
-// View selection reasoning
-SelectionReport report = runner.getSelectionReport();
-System.out.println("Selected " + report.getSelectedCount() + " of " + 
-                  report.getTotalCount() + " tests");
-```
-
-## Performance Analytics
-
-Track and analyze test performance over time:
-
-```java
-// Get performance metrics
-PerformanceAnalytics analytics = runner.getAnalytics();
-
-// View trends
-List<TestTrend> trends = analytics.getTrends(Duration.ofDays(30));
-
-// Identify slow tests
-List<TestMetric> slowTests = analytics.getSlowestTests(10);
-
-// Export metrics
-analytics.exportMetrics("performance-report.json");
-```
-
-## Failure Prediction
-
-Enable ML-based failure prediction to catch issues early:
-
-```java
-config.setFailurePrediction(true);
-
-// Run prediction analysis
-PredictionReport prediction = runner.predictFailures();
-
-// View high-risk tests
-List<TestRisk> risks = prediction.getHighRiskTests();
-for (TestRisk risk : risks) {
-    System.out.println("High risk: " + risk.getTestName() + 
-                      " (confidence: " + risk.getConfidence() + "%)");
-}
-```
-
-## Output Format
-
-Sophodromos produces clean, informative output:
-
-**Summary Format:**
-```
-==============================================================================
-Sophodromos Test Execution Report (v1.0.0)
-------------------------------------------------------------------------------
-Strategy: Adaptive    |    Parallelism: 4 threads    |    Selection: Intelligent
-Total Tests: 156      |    Selected: 23 tests        |    Cached: 133 tests
-Execution Time: 2.3s  |    Time Saved: 45.7s         |    Success Rate: 100%
-
-💚 23 passed, 💔 0 failed, 💤 0 skipped, ⚡ 133 cached
-
-Performance Insights:
-─────────────────────
-• 15% faster than average execution
-• 3 tests showing performance regression
-• Cache hit rate: 85%
-
-✨ All tests passed! Next run estimated: 1.8s
-==============================================================================
-```
-
-**Detailed Format:**
-```
-==============================================================================
-Sophodromos Detailed Execution Report
-------------------------------------------------------------------------------
-Test Selection Analysis:
-• Code changes detected in: 5 files
-• Impact analysis found: 23 affected tests
-• Cache hit rate: 85% (133/156 tests)
-
-Test Execution:
-📦 com.example.service
-    UserServiceTest.shouldCreateUser() .............................💚 (45ms)
-    UserServiceTest.shouldValidateEmail() ..........................💚 (12ms)
-    
-📦 com.example.controller  
-    UserControllerTest.shouldHandleGetRequest() ....................💚 (89ms)
-    UserControllerTest.shouldHandlePostRequest() ...................💚 (123ms)
-
-Performance Analysis:
-─────────────────────
-Fastest: UserServiceTest.shouldValidateEmail() (12ms)
-Slowest: UserControllerTest.shouldHandlePostRequest() (123ms)
-Average: 67ms per test
-
-Failure Predictions:
-───────────────────
-🟡 UserServiceTest.shouldHandleNullInput() - Medium risk (65% confidence)
-🔴 DatabaseConnectionTest.shouldReconnect() - High risk (89% confidence)
-
-✨ Execution complete! Consider reviewing high-risk tests.
-==============================================================================
-```
-
-## Integration Examples
-
-### Maven Integration
-```xml
-<plugin>
-    <groupId>io.github.clojang</groupId>
-    <artifactId>sophodromos-maven-plugin</artifactId>
-    <version>0.1.7</version>
-    <configuration>
-        <parallelism>6</parallelism>
-        <intelligentSelection>true</intelligentSelection>
-        <executionStrategy>adaptive</executionStrategy>
-    </configuration>
-</plugin>
-```
-
-### Gradle Integration
-```kotlin
-sophodromos {
-    parallelism = 8
-    intelligentSelection = true
-    performanceTracking = true
-    executionStrategy = "adaptive"
-    reportFormat = "detailed"
-    
-    // Advanced options
-    cacheDirectory = file("build/sophodromos-cache")
-    analysisDepth = "full"
-    mlModelPath = "models/failure-prediction.model"
-}
-```
-
-### CI/CD Integration
-```yaml
-# GitHub Actions example
-- name: Run Sophodromos Tests
-  run: ./gradlew test -Psophodromos.strategy=priority -Psophodromos.parallelism=4
-  
-- name: Upload Performance Report
-  uses: actions/upload-artifact@v3
-  with:
-    name: sophodromos-performance-report
-    path: build/reports/sophodromos/
-```
-
-## Demo Application
-
-Run the demo to see Sophodromos in action:
-
-```bash
-mvn compile exec:java -Dexec.mainClass="io.github.clojang.sophodromos.demo.DemoApp"
-```
-
-[![Demo screenshot][screenshot]][screenshot]
+- **Java**: 17+
+- **Maven**: 3.8+
 
 ## Building from Source
 
@@ -308,35 +141,38 @@ cd sophodromos
 mvn clean install
 ```
 
-## Requirements
+## Development
 
-- **Java**: 17+
-- **Maven**: 3.8+ or **Gradle**: 8.0+
-- **Memory**: 512MB+ recommended for ML features
+### Running Tests
+
+```bash
+# Run sophodromos's own tests
+make test
+
+# Test in example projects
+cd test-projects/single-module && make test
+cd test-projects/multi-module && mvn sd:test
+```
+
+### Making Changes
+
+1. Edit source code in `src/main/java/io/github/clojang/sophodromos/`
+2. Build with `mvn clean install`
+3. Test with example projects
 
 ## Contributing
 
 Found a bug or have a feature request? Please [open an issue](https://github.com/clojang/sophodromos/issues/new) on GitHub!
 
-### Development Setup
-
-```bash
-git clone https://github.com/clojang/sophodromos.git
-cd sophodromos
-./mvnw clean compile
-./mvnw test
-```
-
 ## Background
 
-Sophodromos was created to address the growing complexity of test suites in modern applications. As codebases grow, running all tests becomes time-consuming and resource-intensive. By applying intelligent analysis and machine learning techniques, Sophodromos helps teams maintain fast feedback loops while ensuring comprehensive test coverage.
+Sophodromos was created to bring clean, readable test output to Maven projects. While Gradle has excellent test formatters like GradlDromus, Maven's default output can be verbose and hard to parse. Sophodromos fills this gap by providing a simple, focused test formatter.
 
 The name combines the Greek words "sophos" (wise) and "dromos" (running/course), reflecting the project's goal of bringing wisdom to test execution.
 
 ## Related Projects
 
 This library is part of the Clojang ecosystem:
-- [clojog](https://github.com/clojang/clojog) - Beautiful logging for Java applications
 - [gradldromus](https://github.com/clojang/gradldromus) - Clean test output formatting for Gradle
 
 ## License
@@ -347,12 +183,11 @@ Licensed under the Apache License, Version 2.0. See `LICENSE` file for details.
 
 ---
 
-**Made with 💚 by developers who believe testing should be both smart and fast**
+**Made with 💚 by developers who believe testing should be beautiful**
 
 [//]: ---Named-Links---
 
 [logo]: https://github.com/clojang/gradldromus/blob/main/resources/images/logo.jpg?raw=true
 [logo-large]: https://github.com/clojang/gradldromus/blob/main/resources/images/logo-large.jpg?raw=true
-[screenshot]: resources/images/demo-screenshot.png
 [gh-actions-badge]: https://github.com/clojang/sophodromos/workflows/CI/badge.svg
 [gh-actions]: https://github.com/clojang/sophodromos/actions?query=workflow%3ACI
