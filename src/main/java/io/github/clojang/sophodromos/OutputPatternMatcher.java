@@ -24,7 +24,7 @@ class OutputPatternMatcher {
       Pattern.compile("^(.+?)\\((.+?)\\)\\s+Time elapsed:\\s+([\\d.]+)\\s+s(?:ec)?$");
   private static final Pattern MTHD_EXEC_PATTERN =
       Pattern.compile(
-          "^(?:\\[INFO\\]\\s+)?([^\\s]+)\\.([^\\s]+)\\s+--\\s+Time elapsed:\\s+([\\d.]+)\\s+s"
+          "^\\[INFO\\]\\s+([^\\s]+)\\.([^\\s]+)\\s+--\\s+Time elapsed:\\s+([\\d.]+)\\s+s"
               + "(?:ec)?$");
 
   /**
