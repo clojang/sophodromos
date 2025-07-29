@@ -24,8 +24,8 @@ hs_err_pid*
 replay_pid*
 
 # Build dirs
-/target
-test-project/target
-
+/target/*
+/test-projects/*/target
+/test-projects/*/*/target
 # AI dirs
 .claude
