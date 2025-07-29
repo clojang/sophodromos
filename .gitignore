@@ -27,5 +27,7 @@ replay_pid*
 /target/*
 /test-projects/*/target
 /test-projects/*/*/target
+/test-projects/*/modules/*/target
+
 # AI dirs
 .claude

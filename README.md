@@ -64,6 +64,18 @@ Time: 0.0s
 ================================================================================
 ```
 
+This plugin works with multi-module projects, too. If you want to only run tests for a specific module, you can use:
+
+```bash
+mvn sd:test -pl modules/my-module -Dmaven.test.skip=true
+```
+
+If your doesn't use the standard `modules` and uses a flat structure, you can run:
+
+```bash
+mvn sd:test -pl my-module -Dmaven.test.skip=true
+```
+
 ## Configuration
 
 ### Plugin Configuration
