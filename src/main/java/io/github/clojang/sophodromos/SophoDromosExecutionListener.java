@@ -34,6 +34,8 @@ public class SophoDromosExecutionListener extends AbstractExecutionListener {
     // Only initialize if this is a multi-module build with sophodromos
     if (isMultiModuleBuildWithSophodromos(session)) {
       initializeMultiModuleState(session);
+      // Show single warning for multi-module builds
+      showMultiModuleWarning(session);
     }
   }
 
@@ -48,13 +50,14 @@ public class SophoDromosExecutionListener extends AbstractExecutionListener {
   }
 
   @Override
+  @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
   public void projectStarted(final ExecutionEvent event) {
     final MavenSession session = event.getSession();
     final MavenProject project = event.getProject();
 
-    // Mark that sophodromos should suppress output for this module
-    // The mojo will check this flag to determine output behavior
-    if (isSophoDromosMultiModuleEnabled(session) && !isLastModule(session, project)) {
+    // Mark that sophodromos should suppress individual module output for ALL modules
+    // Only the final consolidated summary should be shown
+    if (isSophoDromosMultiModuleEnabled(session)) {
       final String moduleId = getModuleId(project);
       session
           .getUserProperties()
@@ -143,22 +146,16 @@ public class SophoDromosExecutionListener extends AbstractExecutionListener {
     return TRUE_VALUE.equals(session.getUserProperties().getProperty(ENABLED_KEY));
   }
 
-  private boolean isLastModule(final MavenSession session, final MavenProject project) {
-    final MultiModuleStateManager stateManager =
-        new MultiModuleStateManager(session, project, new QuietLog());
-
-    final Set<String> expected = stateManager.getExpectedModules();
-    final Set<String> completed = stateManager.getCompletedModules();
-
-    // This would be the last module if completing it would complete all expected modules
-    final Set<String> afterCompletion = new HashSet<>(completed);
-    afterCompletion.add(getModuleId(project));
-
-    return !expected.isEmpty() && afterCompletion.containsAll(expected);
-  }
-
   private String getModuleId(final MavenProject project) {
     return project.getGroupId() + ":" + project.getArtifactId();
+  }
+
+  @SuppressWarnings({"PMD.UnusedFormalParameter", "PMD.DataflowAnomalyAnalysis"})
+  private void showMultiModuleWarning(final MavenSession session) {
+    // Use a quiet log since we want to use System.out for clean output
+    System.out.println("⚠️  Multi-module SophoDromos execution detected");
+    System.out.println(
+        "💡 Individual module output will be suppressed - final summary will be shown at the end");
   }
 
   /** Simple logger that doesn't output anything - for internal operations. */

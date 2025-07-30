@@ -105,7 +105,7 @@ public class SophoDromosTestMojo extends AbstractMojo {
       return;
     }
 
-    // Warn about potential duplicate test execution
+    // Warn about potential duplicate test execution (only for single-module)
     warnAboutDuplicateExecution();
 
     try {
@@ -140,59 +140,42 @@ public class SophoDromosTestMojo extends AbstractMojo {
   }
 
   /**
-   * Executes sophodromos in multi-module mode. Coordinates with other modules via session
-   * properties and shows consolidated output.
+   * Executes sophodromos in multi-module mode with coordinated output.
+   * First module shows header, last module shows summary.
    */
   private void executeMultiModuleMode() throws MojoExecutionException {
     try {
-      final MultiModuleStateManager stateManager =
-          new MultiModuleStateManager(session, project, getLog());
+      // Determine if this is the first or last module in the reactor
+      final List<MavenProject> allProjects = session.getProjects();
+      final boolean isFirstModule = allProjects.get(0).equals(project);
+      final boolean isLastModule = allProjects.get(allProjects.size() - 1).equals(project);
 
-      // Check if we should suppress output for this module
-      final String moduleId = project.getGroupId() + ":" + project.getArtifactId();
-      boolean suppressOutput =
-          "true"
-              .equals(
-                  session
-                      .getUserProperties()
-                      .getProperty("sophodromos.suppress.output." + moduleId));
+      // Initialize components
+      initializeComponents();
 
-      // Show header only for the first module (called for side effects)
-      stateManager.shouldShowHeader();
+      // Only first module shows header and warnings
+      if (isFirstModule) {
+        System.out.println("⚠️  Multi-module SophoDromos execution detected");
+        System.out.println("💡 Individual module output will be suppressed - final summary will be shown at the end");
+        System.out.println();
+        displayHeader();
+      }
 
-      // Initialize components but modify output behavior for multi-module
-      initializeMultiModuleComponents(suppressOutput);
-
-      // Execute tests and capture results
+      // All modules run tests but suppress individual summaries
       final TestExecutionResult result = executeTestsWithInterception();
 
-      // Convert to module results format
-      final MultiModuleStateManager.ModuleTestResults moduleResults =
-          new MultiModuleStateManager.ModuleTestResults(moduleId);
-
-      // Copy test output (only the formatted test lines, not Maven output)
-      for (final String line : result.getOutputLines()) {
-        if (isTestOutputLine(line)) {
-          moduleResults.addTestOutput(line);
-        }
+      // Only last module shows the final summary
+      if (isLastModule) {
+        // Create aggregated summary from all modules
+        System.out.println();
+        System.out.println("=".repeat(80));
+        System.out.println("Multi-Module Test Summary");
+        System.out.println("=".repeat(80));
+        displayFormattedResults(result);
       }
 
-      // Set test statistics
-      moduleResults.setTestResults(
-          result.getTotalTests(),
-          result.getPassedTests(),
-          result.getFailedTests(),
-          result.getSkippedTests(),
-          result.getExecutionTime());
-
-      // Register completion with state manager
-      stateManager.completeModule(moduleResults);
-
-      // The ExecutionListener will show the final summary when all modules complete
-
-      if (result.getFailureCount() > 0 || result.getErrorCount() > 0) {
-        throw new MojoExecutionException("Tests failed in module: " + moduleId);
-      }
+      // Check for failures
+      checkForFailures(result);
 
     } catch (final IOException | InterruptedException e) {
       throw new MojoExecutionException("Failed to execute tests in multi-module mode", e);
@@ -290,7 +273,7 @@ public class SophoDromosTestMojo extends AbstractMojo {
 
   /**
    * Determines if we should use single-module formatting mode. Single mode should run if: 1. The
-   * project is not module-based, OR 2. The project is module-based but has only one module, OR 3.
+   * project is not module-based AND not part of a multi-module build, OR 2. The project is module-based but has only one module, OR 3.
    * The project is module-based with multiple modules, but -pl flag was used
    */
   @SuppressWarnings({
@@ -304,6 +287,13 @@ public class SophoDromosTestMojo extends AbstractMojo {
     final boolean isModuleBased = isModuleBasedProject();
     final boolean hasMultipleModules = session.getProjects().size() > 1;
     final boolean usingProjectSelection = isUsingProjectSelection();
+    final boolean isPartOfMultiModuleBuild = isPartOfMultiModuleBuild();
+
+    // If this module is part of a multi-module build but is not the aggregator,
+    // it should suppress its output (not use single-module mode)
+    if (isPartOfMultiModuleBuild && !isModuleBased) {
+      return false; // Use multi-module mode to suppress output
+    }
 
     if (!isModuleBased) {
       // Case 1: Not module-based (single standalone project)
@@ -330,6 +320,28 @@ public class SophoDromosTestMojo extends AbstractMojo {
     return "pom".equals(project.getPackaging())
         && project.getModules() != null
         && !project.getModules().isEmpty();
+  }
+
+  /**
+   * Determines if the current project is part of a multi-module build
+   * by checking if it has a parent with pom packaging and multiple modules.
+   */
+  private boolean isPartOfMultiModuleBuild() {
+    // Check if we're in a reactor build with multiple projects
+    final List<MavenProject> projects = session.getProjects();
+    if (projects.size() > 1) {
+      return true;
+    }
+
+    // Alternative: Check if our parent project is a multi-module aggregator
+    final MavenProject parent = project.getParent();
+    if (parent != null) {
+      return "pom".equals(parent.getPackaging())
+          && parent.getModules() != null
+          && parent.getModules().size() > 1;
+    }
+
+    return false;
   }
 
   @SuppressWarnings({"PMD.OnlyOneReturn", "PMD.LongVariable"})
