@@ -32,9 +32,6 @@
                 <artifactId>sophodromos</artifactId>
                 <version>0.1.8</version>
                 <configuration>
-                    <showModuleNames>false</showModuleNames>
-                    <showMethodNames>false</showMethodNames>
-                    <showTimings>false</showTimings>
                 </configuration>
             </plugin>
         </plugins>

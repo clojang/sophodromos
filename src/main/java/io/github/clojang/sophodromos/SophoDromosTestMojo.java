@@ -88,7 +88,14 @@ public class SophoDromosTestMojo extends AbstractMojo {
   }
 
   @Override
+  @SuppressWarnings("PMD.OnlyOneReturn") // Early returns for different skip conditions
   public void execute() throws MojoExecutionException, MojoFailureException {
+    // Check if we're running against multiple modules - not supported yet
+    if (!shouldUseSingleModuleMode()) {
+      logMultiModuleNotSupported();
+      return;
+    }
+
     if (skipTests) {
       logSkippedTests();
       return;
@@ -128,6 +135,14 @@ public class SophoDromosTestMojo extends AbstractMojo {
     }
   }
 
+  private void logMultiModuleNotSupported() {
+    final Log log = getLog();
+    if (log.isWarnEnabled()) {
+      log.warn("⚠️  Testing against multiple modules is not supported yet.");
+      log.warn("💡 Use -pl to select a specific module, or run sophodromos on individual modules.");
+    }
+  }
+
   private void logSkippedTests() {
     final Log log = getLog();
     if (log.isInfoEnabled()) {
@@ -162,12 +177,84 @@ public class SophoDromosTestMojo extends AbstractMojo {
 
   @SuppressWarnings("PMD.SystemPrintln") // Intentional console output for clean formatting
   private void displayModuleHeader() {
-    if (showModuleNames) {
+    if (showModuleNames && shouldShowModuleNames()) {
       final String artifactId = project.getArtifactId();
       final OutputPatternMatcher patternMatcher = new OutputPatternMatcher(formatter.getColors());
       final String moduleHeader = patternMatcher.formatModuleHeader(artifactId, formatter);
       System.out.println(moduleHeader);
     }
+  }
+
+  private boolean shouldShowModuleNames() {
+    // Always show module names unless user explicitly disabled them
+    // The showModuleNames parameter controls this, not the execution mode
+    return showModuleNames;
+  }
+
+  /**
+   * Determines if we should use single-module formatting mode. Single mode should run if: 1. The
+   * project is not module-based, OR 2. The project is module-based but has only one module, OR 3.
+   * The project is module-based with multiple modules, but -pl flag was used
+   */
+  @SuppressWarnings({
+    "PMD.OnlyOneReturn",
+    "PMD.PrematureDeclaration",
+    "PMD.LongVariable",
+    "PMD.DataflowAnomalyAnalysis",
+    "PMD.SimplifyBooleanReturns"
+  })
+  private boolean shouldUseSingleModuleMode() {
+    final boolean isModuleBased = isModuleBasedProject();
+    final boolean hasMultipleModules = session.getProjects().size() > 1;
+    final boolean usingProjectSelection = isUsingProjectSelection();
+
+    if (!isModuleBased) {
+      // Case 1: Not module-based (single standalone project)
+      return true;
+    }
+
+    if (!hasMultipleModules) {
+      // Case 2: Module-based but only one module
+      return true;
+    }
+
+    if (usingProjectSelection) {
+      // Case 3: Multiple modules but user selected specific modules with -pl
+      return true;
+    }
+
+    // Default: Multi-module mode (module-based project with multiple modules, no -pl)
+    return false;
+  }
+
+  private boolean isModuleBasedProject() {
+    // Use Maven's official API: aggregator projects have "pom" packaging
+    // and declare modules in their POM
+    return "pom".equals(project.getPackaging())
+        && project.getModules() != null
+        && !project.getModules().isEmpty();
+  }
+
+  @SuppressWarnings({"PMD.OnlyOneReturn", "PMD.LongVariable"})
+  private boolean isUsingProjectSelection() {
+    // Use Maven's official APIs to detect -pl flag usage
+    // Compare declared modules vs actual projects in session
+
+    final boolean hasModules = project.getModules() != null && !project.getModules().isEmpty();
+    if (!hasModules) {
+      return false;
+    }
+
+    // If we're in a reactor build but have fewer projects than declared modules,
+    // it indicates -pl was used to select specific projects
+    final int declaredModules = project.getModules().size();
+    final int sessionProjects = session.getProjects().size();
+
+    // Account for the parent project itself in the count
+    final boolean hasParentInSession = session.getProjects().contains(project);
+    final int expectedTotal = declaredModules + (hasParentInSession ? 1 : 0);
+
+    return sessionProjects < expectedTotal;
   }
 
   @SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.DataflowAnomalyAnalysis"})
