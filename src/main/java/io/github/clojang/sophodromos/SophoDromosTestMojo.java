@@ -25,7 +25,10 @@ import org.apache.maven.project.MavenProject;
   "PMD.LawOfDemeter",
   "PMD.UnnecessaryConstructor",
   "PMD.CloseResource",
-  "PMD.AvoidDuplicateLiterals"
+  "PMD.AvoidDuplicateLiterals",
+  "PMD.GodClass",
+  "PMD.LocalVariableCouldBeFinal",
+  "PMD.AvoidFinalLocalVariable"
 })
 // Standard Maven plugin patterns
 public class SophoDromosTestMojo extends AbstractMojo {
@@ -90,15 +93,15 @@ public class SophoDromosTestMojo extends AbstractMojo {
   @Override
   @SuppressWarnings("PMD.OnlyOneReturn") // Early returns for different skip conditions
   public void execute() throws MojoExecutionException, MojoFailureException {
-    // Check if we're running against multiple modules - not supported yet
-    if (!shouldUseSingleModuleMode()) {
-      logMultiModuleNotSupported();
-      throw new MojoFailureException(
-          "Multi-module execution not supported. Use -pl to select a module.");
-    }
-
     if (skipTests) {
       logSkippedTests();
+      return;
+    }
+
+    // Determine execution mode: single-module or multi-module
+    final boolean isMultiModule = !shouldUseSingleModuleMode();
+    if (isMultiModule) {
+      executeMultiModuleMode();
       return;
     }
 
@@ -136,11 +139,63 @@ public class SophoDromosTestMojo extends AbstractMojo {
     }
   }
 
-  private void logMultiModuleNotSupported() {
-    final Log log = getLog();
-    if (log.isWarnEnabled()) {
-      log.warn("⚠️  Testing against multiple modules is not supported yet.");
-      log.warn("💡 Use -pl to select a specific module, or run sophodromos on individual modules.");
+  /**
+   * Executes sophodromos in multi-module mode. Coordinates with other modules via session
+   * properties and shows consolidated output.
+   */
+  private void executeMultiModuleMode() throws MojoExecutionException {
+    try {
+      final MultiModuleStateManager stateManager =
+          new MultiModuleStateManager(session, project, getLog());
+
+      // Check if we should suppress output for this module
+      final String moduleId = project.getGroupId() + ":" + project.getArtifactId();
+      boolean suppressOutput =
+          "true"
+              .equals(
+                  session
+                      .getUserProperties()
+                      .getProperty("sophodromos.suppress.output." + moduleId));
+
+      // Show header only for the first module (called for side effects)
+      stateManager.shouldShowHeader();
+
+      // Initialize components but modify output behavior for multi-module
+      initializeMultiModuleComponents(suppressOutput);
+
+      // Execute tests and capture results
+      final TestExecutionResult result = executeTestsWithInterception();
+
+      // Convert to module results format
+      final MultiModuleStateManager.ModuleTestResults moduleResults =
+          new MultiModuleStateManager.ModuleTestResults(moduleId);
+
+      // Copy test output (only the formatted test lines, not Maven output)
+      for (final String line : result.getOutputLines()) {
+        if (isTestOutputLine(line)) {
+          moduleResults.addTestOutput(line);
+        }
+      }
+
+      // Set test statistics
+      moduleResults.setTestResults(
+          result.getTotalTests(),
+          result.getPassedTests(),
+          result.getFailedTests(),
+          result.getSkippedTests(),
+          result.getExecutionTime());
+
+      // Register completion with state manager
+      stateManager.completeModule(moduleResults);
+
+      // The ExecutionListener will show the final summary when all modules complete
+
+      if (result.getFailureCount() > 0 || result.getErrorCount() > 0) {
+        throw new MojoExecutionException("Tests failed in module: " + moduleId);
+      }
+
+    } catch (final IOException | InterruptedException e) {
+      throw new MojoExecutionException("Failed to execute tests in multi-module mode", e);
     }
   }
 
@@ -166,6 +221,47 @@ public class SophoDromosTestMojo extends AbstractMojo {
     final TestExecutionInterceptor interceptor = new TestExecutionInterceptor(project, formatter);
     processManager = new TestProcessManager(project);
     outputCapture = new TestOutputCapture(interceptor, showProgress && showMethodNames, getLog());
+  }
+
+  /** Initializes components for multi-module execution with output control. */
+  private void initializeMultiModuleComponents(final boolean suppressOutput) {
+    // Create formatter with enhanced configuration, but potentially suppress output
+    formatter =
+        new TestOutputFormatter(
+            useColors && colorOutput, // Use both old and new color flags
+            detailedFailures,
+            showTimings,
+            passSymbol,
+            failSymbol,
+            skipSymbol,
+            terminalWidth);
+
+    final TestExecutionInterceptor interceptor = new TestExecutionInterceptor(project, formatter);
+    processManager = new TestProcessManager(project);
+
+    // Control output based on multi-module settings
+    final boolean showOutput = !suppressOutput && showProgress && showMethodNames;
+    outputCapture = new TestOutputCapture(interceptor, showOutput, getLog());
+  }
+
+  /** Determines if a line is actual test output (vs Maven build output). */
+  @SuppressWarnings("PMD.OnlyOneReturn") // Multiple return points for clarity
+  private boolean isTestOutputLine(final String line) {
+    if (line == null || line.isBlank()) {
+      return false;
+    }
+
+    // Include lines that are sophodromos-formatted test output
+    // These typically contain test method names or progress indicators
+    return line.contains("💚")
+        || line.contains("💔")
+        || line.contains("💤")
+        || line.contains("✨")
+        || line.contains("❌")
+        || line.contains(".") && line.contains("()")
+        || line.contains("Test")
+        || line.contains("Test Summary:")
+        || line.contains("─────────────");
   }
 
   @SuppressWarnings("PMD.SystemPrintln") // Intentional console output for clean formatting

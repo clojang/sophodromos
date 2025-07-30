@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component-set>
+  <components>
+    <component>
+      <role>org.apache.maven.execution.ExecutionListener</role>
+      <role-hint>sophodromos</role-hint>
+      <implementation>io.github.clojang.sophodromos.SophoDromosExecutionListener</implementation>
+      <description>SophoDromos execution listener for multi-module coordination</description>
+    </component>
+  </components>
+</component-set>
