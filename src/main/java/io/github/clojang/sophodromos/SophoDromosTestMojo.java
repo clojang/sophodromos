@@ -93,7 +93,8 @@ public class SophoDromosTestMojo extends AbstractMojo {
     // Check if we're running against multiple modules - not supported yet
     if (!shouldUseSingleModuleMode()) {
       logMultiModuleNotSupported();
-      return;
+      throw new MojoFailureException(
+          "Multi-module execution not supported. Use -pl to select a module.");
     }
 
     if (skipTests) {
