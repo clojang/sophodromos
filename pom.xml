@@ -58,7 +58,7 @@
         <!-- Quality tools versions -->
         <spotless-maven-plugin.version>2.46.1</spotless-maven-plugin.version>
         <checkstyle-maven-plugin.version>3.6.0</checkstyle-maven-plugin.version>
-        <spotbugs-maven-plugin.version>4.7.3.6</spotbugs-maven-plugin.version>
+        <spotbugs-maven-plugin.version>4.9.4.0</spotbugs-maven-plugin.version>
         <pmd-maven-plugin.version>3.21.0</pmd-maven-plugin.version>
         <dependency-check-maven.version>12.1.3</dependency-check-maven.version>
         <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
