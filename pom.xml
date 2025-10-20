@@ -66,7 +66,7 @@
         <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
 
         <!-- Quality rules versions -->
-        <checkstyle.version>10.26.1</checkstyle.version>
+        <checkstyle.version>12.1.0</checkstyle.version>
         <google-java-format.version>1.17.0</google-java-format.version>
 
         <!-- Test dependencies versions -->
