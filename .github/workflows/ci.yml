@@ -89,7 +89,7 @@ jobs:
       run: mvn javadoc:javadoc -Dmaven.gpg.skip=true
       
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: build-artifacts
         path: |
@@ -170,7 +170,7 @@ jobs:
       run: mvn org.owasp:dependency-check-maven:check -Dmaven.gpg.skip=true -Dnvd.api.key=$NVD_API_KEY
 
     - name: Upload dependency check results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: always()
       with:
         name: dependency-check-report
